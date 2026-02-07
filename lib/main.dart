@@ -336,7 +336,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
         _isReceiving = true;
         final l10n = AppLocalizations.of(context)!;
         _receivedLogs.add(l10n.connectionStarted(port));
-        _receivedLogs.add(l10n.logFile(logFile.path));
+        _receivedLogs.add(l10n.logFile(timestamp));
       });
     } catch (e) {
       debugPrint('接続エラー: $e');

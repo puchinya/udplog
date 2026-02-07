@@ -20,6 +20,13 @@
   "socketClosed": "ソケットが閉じられました",
   "connectionStarted": "--- 接続開始 (ポート: {port}) ---",
   "logFile": "ログファイル: {path}",
+  "@logFile": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "disconnected": "--- 切断 ---",
   "dataProcessingError": "データ処理エラー: {error}",
   "addressNotFound": "アドレスが見つかりません",
