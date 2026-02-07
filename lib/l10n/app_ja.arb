@@ -40,6 +40,14 @@
   "settings": "設定",
   "fontSettings": "フォント設定",
   "fontSize": "フォントサイズ",
+  "language": "言語",
+  "languageSystem": "OSの設定に従う",
+  "languageEn": "English",
+  "languageJa": "日本語",
+  "theme": "テーマ",
+  "themeSystem": "システム設定に従う",
+  "themeLight": "ライト",
+  "themeDark": "ダーク",
   "licenses": "オープンソースライセンス",
   "version": "バージョン: {version}"
 }

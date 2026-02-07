@@ -154,6 +154,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fontSize => 'Font Size';
 
   @override
+  String get language => 'Language';
+
+  @override
+  String get languageSystem => 'Follow OS';
+
+  @override
+  String get languageEn => 'English';
+
+  @override
+  String get languageJa => 'Japanese';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get themeSystem => 'System Default';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
   String get licenses => 'Open Source Licenses';
 
   @override

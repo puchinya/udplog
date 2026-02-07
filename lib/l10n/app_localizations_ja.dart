@@ -154,6 +154,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get fontSize => 'フォントサイズ';
 
   @override
+  String get language => '言語';
+
+  @override
+  String get languageSystem => 'OSの設定に従う';
+
+  @override
+  String get languageEn => 'English';
+
+  @override
+  String get languageJa => '日本語';
+
+  @override
+  String get theme => 'テーマ';
+
+  @override
+  String get themeSystem => 'システム設定に従う';
+
+  @override
+  String get themeLight => 'ライト';
+
+  @override
+  String get themeDark => 'ダーク';
+
+  @override
   String get licenses => 'オープンソースライセンス';
 
   @override

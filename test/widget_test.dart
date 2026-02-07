@@ -22,11 +22,18 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     // Build our app with Japanese locale
     await tester.pumpWidget(
-      const MaterialApp(
-        locale: Locale('ja'),
+      MaterialApp(
+        locale: const Locale('ja'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: MainNavigationPage(),
+        home: MainNavigationPage(
+          themeMode: ThemeMode.system,
+          fontSize: 12.0,
+          locale: const Locale('ja'),
+          onThemeChanged: (_) {},
+          onFontSizeChanged: (_) {},
+          onLocaleChanged: (_) {},
+        ),
       ),
     );
     await tester.pumpAndSettle();

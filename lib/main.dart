@@ -17,15 +17,96 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+  double _fontSize = 12.0;
+  Locale? _locale;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _fontSize = prefs.getDouble('fontSize') ?? 12.0;
+      final themeIndex = prefs.getInt('themeMode') ?? ThemeMode.system.index;
+      _themeMode = ThemeMode.values[themeIndex];
+      
+      final languageCode = prefs.getString('languageCode');
+      if (languageCode != null && languageCode.isNotEmpty) {
+        _locale = Locale(languageCode);
+      } else {
+        _locale = null;
+      }
+      
+      _initialized = true;
+    });
+  }
+
+  Future<void> updateThemeMode(ThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('themeMode', mode.index);
+    setState(() {
+      _themeMode = mode;
+    });
+  }
+
+  Future<void> updateFontSize(double size) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('fontSize', size);
+    setState(() {
+      _fontSize = size;
+    });
+  }
+
+  Future<void> updateLocale(Locale? locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (locale == null) {
+      await prefs.remove('languageCode');
+    } else {
+      await prefs.setString('languageCode', locale.languageCode);
+    }
+    setState(() {
+      _locale = locale;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (!_initialized) {
+      return MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: _locale,
+      localeResolutionCallback: (locale, supportedLocales) {
+        if (_locale != null) return _locale;
+        if (locale != null) {
+          for (var supportedLocale in supportedLocales) {
+            if (supportedLocale.languageCode == locale.languageCode) {
+              return supportedLocale;
+            }
+          }
+        }
+        return supportedLocales.first;
+      },
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -37,14 +118,36 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      themeMode: ThemeMode.system,
-      home: const MainNavigationPage(),
+      themeMode: _themeMode,
+      home: MainNavigationPage(
+        themeMode: _themeMode,
+        fontSize: _fontSize,
+        locale: _locale,
+        onThemeChanged: updateThemeMode,
+        onFontSizeChanged: updateFontSize,
+        onLocaleChanged: updateLocale,
+      ),
     );
   }
 }
 
 class MainNavigationPage extends StatefulWidget {
-  const MainNavigationPage({super.key});
+  final ThemeMode themeMode;
+  final double fontSize;
+  final Locale? locale;
+  final Function(ThemeMode) onThemeChanged;
+  final Function(double) onFontSizeChanged;
+  final Function(Locale?) onLocaleChanged;
+
+  const MainNavigationPage({
+    super.key,
+    required this.themeMode,
+    required this.fontSize,
+    required this.locale,
+    required this.onThemeChanged,
+    required this.onFontSizeChanged,
+    required this.onLocaleChanged,
+  });
 
   @override
   State<MainNavigationPage> createState() => _MainNavigationPageState();
@@ -52,53 +155,38 @@ class MainNavigationPage extends StatefulWidget {
 
 class SettingsProvider extends InheritedWidget {
   final double fontSize;
-  final _MainNavigationPageState state;
+  final ThemeMode themeMode;
+  final Locale? locale;
+  final Function(ThemeMode) updateThemeMode;
+  final Function(double) updateFontSize;
+  final Function(Locale?) updateLocale;
 
   const SettingsProvider({
     super.key,
     required this.fontSize,
-    required this.state,
+    required this.themeMode,
+    required this.locale,
+    required this.updateThemeMode,
+    required this.updateFontSize,
+    required this.updateLocale,
     required super.child,
   });
 
-  static _MainNavigationPageState? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<SettingsProvider>()?.state;
+  static SettingsProvider? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SettingsProvider>();
   }
 
   @override
   bool updateShouldNotify(SettingsProvider oldWidget) {
-    return fontSize != oldWidget.fontSize;
+    return fontSize != oldWidget.fontSize || 
+           themeMode != oldWidget.themeMode ||
+           locale != oldWidget.locale;
   }
 }
 
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
   final GlobalKey<_LogViewerPageState> _logViewerKey = GlobalKey<_LogViewerPageState>();
-
-  double _fontSize = 12.0;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadFontSettings();
-  }
-
-  Future<void> _loadFontSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _fontSize = prefs.getDouble('fontSize') ?? 12.0;
-    });
-  }
-
-  Future<void> updateFontSettings(double size) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('fontSize', size);
-    setState(() {
-      _fontSize = size;
-    });
-  }
-
-  double get fontSize => _fontSize;
 
   void _onTabTapped(int index) {
     setState(() {
@@ -112,8 +200,12 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return SettingsProvider(
-      fontSize: _fontSize,
-      state: this,
+      fontSize: widget.fontSize,
+      themeMode: widget.themeMode,
+      locale: widget.locale,
+      updateThemeMode: widget.onThemeChanged,
+      updateFontSize: widget.onFontSizeChanged,
+      updateLocale: widget.onLocaleChanged,
       child: Scaffold(
         body: IndexedStack(
           index: _selectedIndex,
@@ -901,6 +993,47 @@ class _SettingsPageState extends State<SettingsPage> {
       body: ListView(
         children: [
           ListTile(
+            title: Text(l10n.theme, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SegmentedButton<ThemeMode>(
+              segments: [
+                ButtonSegment(value: ThemeMode.system, label: Text(l10n.themeSystem), icon: const Icon(Icons.settings_brightness)),
+                ButtonSegment(value: ThemeMode.light, label: Text(l10n.themeLight), icon: const Icon(Icons.light_mode)),
+                ButtonSegment(value: ThemeMode.dark, label: Text(l10n.themeDark), icon: const Icon(Icons.dark_mode)),
+              ],
+              selected: {navState?.themeMode ?? ThemeMode.system},
+              onSelectionChanged: (Set<ThemeMode> newSelection) {
+                if (navState != null) {
+                  navState.updateThemeMode(newSelection.first);
+                }
+              },
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            title: Text(l10n.language, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SegmentedButton<String?>(
+              segments: [
+                ButtonSegment(value: null, label: Text(l10n.languageSystem)),
+                ButtonSegment(value: 'en', label: Text(l10n.languageEn)),
+                ButtonSegment(value: 'ja', label: Text(l10n.languageJa)),
+              ],
+              selected: {navState?.locale?.languageCode},
+              onSelectionChanged: (Set<String?> newSelection) {
+                if (navState != null) {
+                  final code = newSelection.first;
+                  navState.updateLocale(code == null ? null : Locale(code));
+                }
+              },
+            ),
+          ),
+          const Divider(),
+          ListTile(
             title: Text(l10n.fontSettings, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
           Padding(
@@ -919,9 +1052,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         label: navState?.fontSize.round().toString(),
                         onChanged: (double value) {
                           if (navState != null) {
-                            setState(() {
-                              navState.updateFontSettings(value);
-                            });
+                            navState.updateFontSize(value);
                           }
                         },
                       ),
