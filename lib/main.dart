@@ -406,7 +406,10 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.udpCommunication)),
+      appBar: AppBar(
+        title: Text(l10n.udpCommunication),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -752,6 +755,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
       return Scaffold(
         appBar: AppBar(
           title: Text(l10n.logViewer),
+          centerTitle: true,
           actions: [
             IconButton(
               onPressed: refreshLogFiles,
@@ -770,6 +774,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.logViewer),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: refreshLogFiles,
@@ -845,6 +850,7 @@ class LogDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(fileName.replaceFirst('udp_log_', '').replaceFirst('.txt', '')),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
@@ -914,7 +920,10 @@ class _SettingsPageState extends State<SettingsPage> {
     final navState = SettingsProvider.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settings)),
+      appBar: AppBar(
+        title: Text(l10n.settings),
+        centerTitle: true,
+      ),
       body: ListView(
         children: [
           ListTile(
