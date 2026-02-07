@@ -1,0 +1,130 @@
+{
+  "appTitle": "UDPLog",
+  "tabCommunication": "Comm",
+  "tabLog": "Log",
+  "udpCommunication": "UDP Comm",
+  "receivePort": "Receive Port",
+  "connect": "Connect",
+  "disconnect": "Disconnect",
+  "destinationIp": "Dest IP",
+  "port": "Port",
+  "sendDataHex": "Send Data (Hex: 00AA...)",
+  "sendText": "Send Text",
+  "hexMode": "Hex",
+  "sendHistory": "History",
+  "sendComplete": "Send Complete",
+  "hexParseError": "Invalid Hex format",
+  "invalidAddress": "Invalid address: {address}",
+  "@invalidAddress": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  },
+  "portRangeError": "Port must be 1-65535",
+  "receiveError": "Receive Error: {error}",
+  "@receiveError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "socketClosed": "Socket closed",
+  "connectionStarted": "--- Connection Started (Port: {port}) ---",
+  "@connectionStarted": {
+    "placeholders": {
+      "port": {
+        "type": "int"
+      }
+    }
+  },
+  "logFile": "Log file: {path}",
+  "@logFile": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "disconnected": "--- Disconnected ---",
+  "dataProcessingError": "Data processing error: {error}",
+  "@dataProcessingError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "addressNotFound": "Address not found",
+  "logViewer": "Log Viewer",
+  "noLogs": "No logs",
+  "selectLogFile": "Select a log file",
+  "file": "File: {name}",
+  "@file": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmDelete": "Confirm Delete",
+  "deleteMessage": "Delete log file \"{fileName}\"?",
+  "@deleteMessage": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "deleted": "Deleted: {fileName}",
+  "@deleted": {
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteFailed": "Delete failed: {error}",
+  "@deleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "error": "Error: {error}",
+  "@error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "share": "Share",
+  "shareFailed": "Share failed: {error}",
+  "@shareFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "tabSettings": "Settings",
+  "settings": "Settings",
+  "fontSettings": "Font Settings",
+  "fontFamily": "Font Family",
+  "fontSize": "Font Size",
+  "licenses": "Open Source Licenses",
+  "version": "Version: {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  }
+}

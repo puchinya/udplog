@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:udplog/l10n/app_localizations.dart';
 
 void main() {
-  testWidgets('UDP Log App basic UI test', (WidgetTester tester) async {
+  testWidgets('UDPLog basic UI test', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
@@ -18,7 +18,7 @@ void main() {
     expect(find.byIcon(Icons.settings), findsOneWidget);
   });
 
-  testWidgets('UDP Log App Japanese UI test', (WidgetTester tester) async {
+  testWidgets('UDPLog Japanese UI test', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     // Build our app with Japanese locale
     await tester.pumpWidget(
