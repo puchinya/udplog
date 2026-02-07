@@ -125,6 +125,7 @@
   "themeSystem": "System Default",
   "themeLight": "Light",
   "themeDark": "Dark",
+  "preventSleepDuringUdp": "Prevent sleep during UDP reception",
   "licenses": "Open Source Licenses",
   "version": "Version: {version}",
   "@version": {

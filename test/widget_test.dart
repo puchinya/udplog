@@ -30,9 +30,11 @@ void main() {
           themeMode: ThemeMode.system,
           fontSize: 12.0,
           locale: const Locale('ja'),
+          preventSleepDuringUdp: true,
           onThemeChanged: (_) {},
           onFontSizeChanged: (_) {},
           onLocaleChanged: (_) {},
+          onPreventSleepDuringUdpChanged: (_) {},
         ),
       ),
     );

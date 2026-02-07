@@ -178,6 +178,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get themeDark => 'ダーク';
 
   @override
+  String get preventSleepDuringUdp => 'UDP受信中の端末のスリープ禁止';
+
+  @override
   String get licenses => 'オープンソースライセンス';
 
   @override

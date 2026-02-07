@@ -11,6 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:udplog/l10n/app_localizations.dart';
 
 void main() {
@@ -28,6 +29,7 @@ class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.system;
   double _fontSize = 12.0;
   Locale? _locale;
+  bool _preventSleepDuringUdp = true;
   bool _initialized = false;
 
   @override
@@ -42,6 +44,7 @@ class _MyAppState extends State<MyApp> {
       _fontSize = prefs.getDouble('fontSize') ?? 12.0;
       final themeIndex = prefs.getInt('themeMode') ?? ThemeMode.system.index;
       _themeMode = ThemeMode.values[themeIndex];
+      _preventSleepDuringUdp = prefs.getBool('preventSleepDuringUdp') ?? true;
       
       final languageCode = prefs.getString('languageCode');
       if (languageCode != null && languageCode.isNotEmpty) {
@@ -79,6 +82,14 @@ class _MyAppState extends State<MyApp> {
     }
     setState(() {
       _locale = locale;
+    });
+  }
+
+  Future<void> updatePreventSleepDuringUdp(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('preventSleepDuringUdp', value);
+    setState(() {
+      _preventSleepDuringUdp = value;
     });
   }
 
@@ -123,9 +134,11 @@ class _MyAppState extends State<MyApp> {
         themeMode: _themeMode,
         fontSize: _fontSize,
         locale: _locale,
+        preventSleepDuringUdp: _preventSleepDuringUdp,
         onThemeChanged: updateThemeMode,
         onFontSizeChanged: updateFontSize,
         onLocaleChanged: updateLocale,
+        onPreventSleepDuringUdpChanged: updatePreventSleepDuringUdp,
       ),
     );
   }
@@ -135,18 +148,22 @@ class MainNavigationPage extends StatefulWidget {
   final ThemeMode themeMode;
   final double fontSize;
   final Locale? locale;
+  final bool preventSleepDuringUdp;
   final Function(ThemeMode) onThemeChanged;
   final Function(double) onFontSizeChanged;
   final Function(Locale?) onLocaleChanged;
+  final Function(bool) onPreventSleepDuringUdpChanged;
 
   const MainNavigationPage({
     super.key,
     required this.themeMode,
     required this.fontSize,
     required this.locale,
+    required this.preventSleepDuringUdp,
     required this.onThemeChanged,
     required this.onFontSizeChanged,
     required this.onLocaleChanged,
+    required this.onPreventSleepDuringUdpChanged,
   });
 
   @override
@@ -157,18 +174,22 @@ class SettingsProvider extends InheritedWidget {
   final double fontSize;
   final ThemeMode themeMode;
   final Locale? locale;
+  final bool preventSleepDuringUdp;
   final Function(ThemeMode) updateThemeMode;
   final Function(double) updateFontSize;
   final Function(Locale?) updateLocale;
+  final Function(bool) updatePreventSleepDuringUdp;
 
   const SettingsProvider({
     super.key,
     required this.fontSize,
     required this.themeMode,
     required this.locale,
+    required this.preventSleepDuringUdp,
     required this.updateThemeMode,
     required this.updateFontSize,
     required this.updateLocale,
+    required this.updatePreventSleepDuringUdp,
     required super.child,
   });
 
@@ -180,7 +201,8 @@ class SettingsProvider extends InheritedWidget {
   bool updateShouldNotify(SettingsProvider oldWidget) {
     return fontSize != oldWidget.fontSize || 
            themeMode != oldWidget.themeMode ||
-           locale != oldWidget.locale;
+           locale != oldWidget.locale ||
+           preventSleepDuringUdp != oldWidget.preventSleepDuringUdp;
   }
 }
 
@@ -203,9 +225,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
       fontSize: widget.fontSize,
       themeMode: widget.themeMode,
       locale: widget.locale,
+      preventSleepDuringUdp: widget.preventSleepDuringUdp,
       updateThemeMode: widget.onThemeChanged,
       updateFontSize: widget.onFontSizeChanged,
       updateLocale: widget.onLocaleChanged,
+      updatePreventSleepDuringUdp: widget.onPreventSleepDuringUdpChanged,
       child: Scaffold(
         body: IndexedStack(
           index: _selectedIndex,
@@ -338,6 +362,12 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
         _receivedLogs.add(l10n.connectionStarted(port));
         _receivedLogs.add(l10n.logFile(timestamp));
       });
+
+      // スリープ禁止設定の適用
+      final settings = SettingsProvider.of(context);
+      if (settings != null && settings.preventSleepDuringUdp) {
+        WakelockPlus.enable();
+      }
     } catch (e) {
       debugPrint('接続エラー: $e');
       if (mounted) {
@@ -352,6 +382,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
     _logSink?.close();
     _logSink = null;
     _isReceiving = false;
+    WakelockPlus.disable(); // 常に無効化して安全を期す
     if (mounted && _currentLogPath != null) {
       setState(() {
         _receivedLogs.add(AppLocalizations.of(context)!.disconnected);
@@ -1062,6 +1093,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
+          ),
+          const Divider(),
+          SwitchListTile.adaptive(
+            title: Text(l10n.preventSleepDuringUdp, style: const TextStyle(fontWeight: FontWeight.bold)),
+            value: navState?.preventSleepDuringUdp ?? true,
+            onChanged: (bool value) {
+              if (navState != null) {
+                navState.updatePreventSleepDuringUdp(value);
+              }
+            },
           ),
           const Divider(),
           ListTile(

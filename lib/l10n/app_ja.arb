@@ -55,6 +55,7 @@
   "themeSystem": "システム設定に従う",
   "themeLight": "ライト",
   "themeDark": "ダーク",
+  "preventSleepDuringUdp": "UDP受信中の端末のスリープ禁止",
   "licenses": "オープンソースライセンス",
   "version": "バージョン: {version}"
 }

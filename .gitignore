@@ -45,3 +45,4 @@ app.*.map.json
 /android/app/release
 
 /debug_output.txt
+/.output.txt

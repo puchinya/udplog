@@ -392,6 +392,12 @@ abstract class AppLocalizations {
   /// **'Dark'**
   String get themeDark;
 
+  /// No description provided for @preventSleepDuringUdp.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevent sleep during UDP reception'**
+  String get preventSleepDuringUdp;
+
   /// No description provided for @licenses.
   ///
   /// In en, this message translates to:

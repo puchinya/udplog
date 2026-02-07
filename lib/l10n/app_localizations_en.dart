@@ -178,6 +178,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeDark => 'Dark';
 
   @override
+  String get preventSleepDuringUdp => 'Prevent sleep during UDP reception';
+
+  @override
   String get licenses => 'Open Source Licenses';
 
   @override
