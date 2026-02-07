@@ -357,6 +357,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       try {
         final addresses = await InternetAddress.lookup(address);
         if (addresses.isEmpty) {
+          if (!mounted) return;
           throw Exception(AppLocalizations.of(context)!.addressNotFound);
         }
         // ソケットがIPv4でバインドされているため、可能であればIPv4アドレスを優先する
@@ -666,7 +667,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
 
   Future<void> _shareLogFile(File file) async {
     try {
-      await Share.shareXFiles([XFile(file.path)]);
+      await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -854,7 +855,7 @@ class LogDetailPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () => Share.shareXFiles([XFile(file.path)]),
+            onPressed: () => SharePlus.instance.share(ShareParams(files: [XFile(file.path)])),
             tooltip: l10n.share,
           ),
         ],
