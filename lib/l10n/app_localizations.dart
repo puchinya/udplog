@@ -338,12 +338,6 @@ abstract class AppLocalizations {
   /// **'Font Settings'**
   String get fontSettings;
 
-  /// No description provided for @fontFamily.
-  ///
-  /// In en, this message translates to:
-  /// **'Font Family'**
-  String get fontFamily;
-
   /// No description provided for @fontSize.
   ///
   /// In en, this message translates to:

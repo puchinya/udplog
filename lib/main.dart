@@ -52,13 +52,11 @@ class MainNavigationPage extends StatefulWidget {
 }
 
 class SettingsProvider extends InheritedWidget {
-  final String fontFamily;
   final double fontSize;
   final _MainNavigationPageState state;
 
   const SettingsProvider({
     super.key,
-    required this.fontFamily,
     required this.fontSize,
     required this.state,
     required super.child,
@@ -70,7 +68,7 @@ class SettingsProvider extends InheritedWidget {
 
   @override
   bool updateShouldNotify(SettingsProvider oldWidget) {
-    return fontFamily != oldWidget.fontFamily || fontSize != oldWidget.fontSize;
+    return fontSize != oldWidget.fontSize;
   }
 }
 
@@ -78,7 +76,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
   final GlobalKey<_LogViewerPageState> _logViewerKey = GlobalKey<_LogViewerPageState>();
 
-  String _fontFamily = 'monospace';
   double _fontSize = 12.0;
 
   @override
@@ -90,22 +87,18 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   Future<void> _loadFontSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _fontFamily = prefs.getString('fontFamily') ?? 'monospace';
       _fontSize = prefs.getDouble('fontSize') ?? 12.0;
     });
   }
 
-  Future<void> updateFontSettings(String family, double size) async {
+  Future<void> updateFontSettings(double size) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('fontFamily', family);
     await prefs.setDouble('fontSize', size);
     setState(() {
-      _fontFamily = family;
       _fontSize = size;
     });
   }
 
-  String get fontFamily => _fontFamily;
   double get fontSize => _fontSize;
 
   void _onTabTapped(int index) {
@@ -120,7 +113,6 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   @override
   Widget build(BuildContext context) {
     return SettingsProvider(
-      fontFamily: _fontFamily,
       fontSize: _fontSize,
       state: this,
       child: Scaffold(
@@ -409,7 +401,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
     final l10n = AppLocalizations.of(context)!;
     final navState = SettingsProvider.of(context);
     final logStyle = TextStyle(
-      fontFamily: navState?.fontFamily ?? 'monospace',
+      fontFamily: 'monospace',
       fontSize: navState?.fontSize ?? 12,
     );
 
@@ -704,7 +696,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
     final l10n = AppLocalizations.of(context)!;
     final navState = SettingsProvider.of(context);
     final logStyle = TextStyle(
-      fontFamily: navState?.fontFamily ?? 'monospace',
+      fontFamily: 'monospace',
       fontSize: navState?.fontSize ?? 12,
     );
 
@@ -845,7 +837,7 @@ class LogDetailPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final navState = SettingsProvider.of(context);
     final logStyle = TextStyle(
-      fontFamily: navState?.fontFamily ?? 'monospace',
+      fontFamily: 'monospace',
       fontSize: navState?.fontSize ?? 12,
     );
     final fileName = p.basename(file.path);
@@ -934,30 +926,6 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 Row(
                   children: [
-                    Text(l10n.fontFamily),
-                    const SizedBox(width: 20),
-                    Expanded(
-                      child: DropdownButton<String>(
-                        value: navState?.fontFamily,
-                        isExpanded: true,
-                        items: const [
-                          DropdownMenuItem(value: 'monospace', child: Text('Monospace')),
-                          DropdownMenuItem(value: 'sans-serif', child: Text('Sans-serif')),
-                          DropdownMenuItem(value: 'serif', child: Text('Serif')),
-                        ],
-                        onChanged: (String? value) {
-                          if (value != null && navState != null) {
-                            setState(() {
-                              navState.updateFontSettings(value, navState.fontSize);
-                            });
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
                     Text(l10n.fontSize),
                     Expanded(
                       child: Slider.adaptive(
@@ -969,7 +937,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         onChanged: (double value) {
                           if (navState != null) {
                             setState(() {
-                              navState.updateFontSettings(navState.fontFamily, value);
+                              navState.updateFontSettings(value);
                             });
                           }
                         },

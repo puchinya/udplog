@@ -151,9 +151,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get fontSettings => 'フォント設定';
 
   @override
-  String get fontFamily => 'フォント名';
-
-  @override
   String get fontSize => 'フォントサイズ';
 
   @override
