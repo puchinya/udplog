@@ -1,16 +1,24 @@
-# udplog
+# UDPLog
 
-A new Flutter project.
+UDP通信の送受信およびログ管理を行うためのFlutterアプリケーションです。
 
-## Getting Started
+## 主な機能
 
-This project is a starting point for a Flutter application.
+- **UDP送受信**: 指定したポートでUDPパケットを受信し、リアルタイムにログ表示します。また、指定したIPアドレスとポートに対してメッセージを送信できます。
+- **データ形式**: テキスト形式および16進数（Hex）形式での送信に対応しています。
+- **ログ保存**: 受信したデータは自動的にテキストファイルとしてローカルストレージに保存されます。
+- **ログビューア**: 過去の通信ログを閲覧、管理（削除・共有）できます。
+- **共有機能**: ログファイルを他のアプリへ共有（エクスポート）できます。
+- **カスタマイズ**: フォントサイズの変更など、閲覧しやすいように設定を変更可能です。
+- **マルチデバイス対応**: スマートフォン（Android/iOS）およびデスクトップ環境で動作します。
 
-A few resources to get you started if this is your first Flutter project:
+## 使い方
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. **受信**: 「受信ポート」を入力し、「接続」ボタンを押すと待ち受けを開始します。
+2. **送信**: 「宛先IP」と「ポート」を入力し、メッセージを入力して送信アイコンをタップします。
+3. **履歴**: 送信したメッセージは履歴として保存され、再利用可能です。
+4. **ログ確認**: 「ログ」タブから保存された通信記録を確認できます。
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 開発
+
+このプロジェクトはFlutterで構築されています。
