@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -30,6 +31,14 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: ThemeMode.system,
       home: const MainNavigationPage(),
     );
   }
@@ -425,7 +434,12 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                 ElevatedButton(
                   onPressed: _isReceiving ? _disconnect : _connect,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isReceiving ? Colors.red.shade100 : Colors.green.shade100,
+                    backgroundColor: _isReceiving 
+                        ? (Theme.of(context).brightness == Brightness.dark ? Colors.red.shade900 : Colors.red.shade100)
+                        : (Theme.of(context).brightness == Brightness.dark ? Colors.green.shade900 : Colors.green.shade100),
+                    foregroundColor: _isReceiving
+                        ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.red.shade900)
+                        : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.green.shade900),
                   ),
                   child: Text(_isReceiving ? l10n.disconnect : l10n.connect),
                 ),
@@ -436,7 +450,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: Theme.of(context).dividerColor),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: ListView.builder(
@@ -514,7 +528,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                 Column(
                   children: [
                     Text(l10n.hexMode, style: const TextStyle(fontSize: 10)),
-                    Switch(
+                    Switch.adaptive(
                       value: _isHexMode,
                       onChanged: (val) {
                         setState(() => _isHexMode = val);
@@ -526,7 +540,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                 IconButton(
                   onPressed: _isReceiving ? _sendData : null,
                   icon: const Icon(Icons.send),
-                  color: _isReceiving ? Colors.blue : Colors.grey,
+                  color: _isReceiving ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
                 ),
               ],
             ),
@@ -592,24 +606,43 @@ class _LogViewerPageState extends State<LogViewerPage> {
   Future<void> _deleteLogFile(File file) async {
     final l10n = AppLocalizations.of(context)!;
     final fileName = p.basename(file.path);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.confirmDelete),
-        content: Text(l10n.deleteMessage(fileName)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
+    final confirmed = await (Platform.isIOS || Platform.isMacOS
+        ? showCupertinoDialog<bool>(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: Text(l10n.confirmDelete),
+              content: Text(l10n.deleteMessage(fileName)),
+              actions: [
+                CupertinoDialogAction(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(l10n.cancel),
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(l10n.delete),
+                ),
+              ],
+            ),
+          )
+        : showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(l10n.confirmDelete),
+              content: Text(l10n.deleteMessage(fileName)),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(l10n.cancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: Text(l10n.delete),
+                ),
+              ],
+            ),
+          ));
 
     if (confirmed == true) {
       try {
@@ -694,8 +727,8 @@ class _LogViewerPageState extends State<LogViewerPage> {
           // 左側：ファイルリスト
           Container(
             width: 200,
-            decoration: const BoxDecoration(
-              border: Border(right: BorderSide(color: Colors.grey)),
+            decoration: BoxDecoration(
+              border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
             ),
             child: _logFiles.isEmpty
                 ? Center(child: Text(l10n.noLogs, style: const TextStyle(fontSize: 12)))
@@ -714,12 +747,12 @@ class _LogViewerPageState extends State<LogViewerPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.share, size: 16, color: Colors.grey),
+                              icon: Icon(Icons.share, size: 16, color: Theme.of(context).disabledColor),
                               onPressed: () => _shareLogFile(file),
                               tooltip: l10n.share,
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, size: 16, color: Colors.grey),
+                              icon: Icon(Icons.delete, size: 16, color: Theme.of(context).disabledColor),
                               onPressed: () => _deleteLogFile(file),
                               tooltip: l10n.delete,
                             ),
@@ -747,9 +780,8 @@ class _LogViewerPageState extends State<LogViewerPage> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                        border: Border.all(color: Theme.of(context).dividerColor),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: SingleChildScrollView(
@@ -837,7 +869,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     Text(l10n.fontSize),
                     Expanded(
-                      child: Slider(
+                      child: Slider.adaptive(
                         value: navState?.fontSize ?? 12,
                         min: 8,
                         max: 24,
