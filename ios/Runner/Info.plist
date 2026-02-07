@@ -31,7 +31,7 @@
 		<string>_udp._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>UDP通信によるデータの送受信とデバイス探索のためにローカルネットワークへのアクセスが必要です。</string>
+	<string>UDP通信によるデータの送受信のためにローカルネットワークへのアクセスが必要です。</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
