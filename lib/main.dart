@@ -708,6 +708,73 @@ class _LogViewerPageState extends State<LogViewerPage> {
       fontSize: navState?.fontSize ?? 12,
     );
 
+    final isMobile = Platform.isAndroid || Platform.isIOS;
+
+    final fileList = _logFiles.isEmpty
+        ? Center(child: Text(l10n.noLogs, style: const TextStyle(fontSize: 12)))
+        : ListView.builder(
+            itemCount: _logFiles.length,
+            itemBuilder: (context, index) {
+              final file = _logFiles[index];
+              final fileName = p.basename(file.path);
+              final isSelected = fileName == _selectedFileName;
+              return ListTile(
+                title: Text(
+                  fileName.replaceFirst('udp_log_', '').replaceFirst('.txt', ''),
+                  style: const TextStyle(fontSize: 12),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.share, size: 16, color: Theme.of(context).disabledColor),
+                      onPressed: () => _shareLogFile(file),
+                      tooltip: l10n.share,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete, size: 16, color: Theme.of(context).disabledColor),
+                      onPressed: () => _deleteLogFile(file),
+                      tooltip: l10n.delete,
+                    ),
+                  ],
+                ),
+                selected: isSelected,
+                dense: true,
+                onTap: () {
+                  if (isMobile) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => LogDetailPage(file: file),
+                      ),
+                    );
+                  } else {
+                    _loadLogFile(file);
+                  }
+                },
+              );
+            },
+          );
+
+    if (isMobile) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.logViewer),
+          actions: [
+            IconButton(
+              onPressed: refreshLogFiles,
+              icon: const Icon(Icons.refresh),
+            ),
+            IconButton(
+              onPressed: _pickAndLoadFile,
+              icon: const Icon(Icons.file_open),
+            ),
+          ],
+        ),
+        body: fileList,
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.logViewer),
@@ -730,40 +797,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
             decoration: BoxDecoration(
               border: Border(right: BorderSide(color: Theme.of(context).dividerColor)),
             ),
-            child: _logFiles.isEmpty
-                ? Center(child: Text(l10n.noLogs, style: const TextStyle(fontSize: 12)))
-                : ListView.builder(
-                    itemCount: _logFiles.length,
-                    itemBuilder: (context, index) {
-                      final file = _logFiles[index];
-                      final fileName = p.basename(file.path);
-                      final isSelected = fileName == _selectedFileName;
-                      return ListTile(
-                        title: Text(
-                          fileName.replaceFirst('udp_log_', '').replaceFirst('.txt', ''),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.share, size: 16, color: Theme.of(context).disabledColor),
-                              onPressed: () => _shareLogFile(file),
-                              tooltip: l10n.share,
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, size: 16, color: Theme.of(context).disabledColor),
-                              onPressed: () => _deleteLogFile(file),
-                              tooltip: l10n.delete,
-                            ),
-                          ],
-                        ),
-                        selected: isSelected,
-                        dense: true,
-                        onTap: () => _loadLogFile(file),
-                      );
-                    },
-                  ),
+            child: fileList,
           ),
           // 右側：ログ内容
           Expanded(
@@ -797,6 +831,63 @@ class _LogViewerPageState extends State<LogViewerPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class LogDetailPage extends StatelessWidget {
+  final File file;
+  const LogDetailPage({super.key, required this.file});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final navState = SettingsProvider.of(context);
+    final logStyle = TextStyle(
+      fontFamily: navState?.fontFamily ?? 'monospace',
+      fontSize: navState?.fontSize ?? 12,
+    );
+    final fileName = p.basename(file.path);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(fileName.replaceFirst('udp_log_', '').replaceFirst('.txt', '')),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () => Share.shareXFiles([XFile(file.path)]),
+            tooltip: l10n.share,
+          ),
+        ],
+      ),
+      body: FutureBuilder<String>(
+        future: file.readAsString(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text(l10n.error(snapshot.error.toString())));
+          }
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(color: Theme.of(context).dividerColor),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  snapshot.data ?? '',
+                  style: logStyle,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
