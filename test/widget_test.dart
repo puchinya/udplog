@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:udplog/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:udplog/l10n/app_localizations.dart';
 
 void main() {
   testWidgets('UDP Log App basic UI test', (WidgetTester tester) async {
@@ -9,13 +11,28 @@ void main() {
     await tester.pumpWidget(const MyApp());
     await tester.pumpAndSettle();
 
-    // Verify that "UDP 通信" title is present.
+    // Check for English strings (default)
+    expect(find.text('UDP Comm'), findsOneWidget);
+    expect(find.text('Receive Port'), findsOneWidget);
+    expect(find.text('Connect'), findsOneWidget);
+  });
+
+  testWidgets('UDP Log App Japanese UI test', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    // Build our app with Japanese locale
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('ja'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: MainNavigationPage(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Check for Japanese strings
     expect(find.text('UDP 通信'), findsOneWidget);
-
-    // Verify that "受信ポート" text field is present.
     expect(find.text('受信ポート'), findsOneWidget);
-
-    // Verify that "接続" button is present.
     expect(find.text('接続'), findsOneWidget);
   });
 }

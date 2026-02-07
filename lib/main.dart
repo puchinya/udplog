@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:udplog/l10n/app_localizations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,7 +21,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'UDP Log App',
+      onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -53,9 +56,9 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.swap_horiz), label: '通信'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'ログ'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.swap_horiz), label: AppLocalizations.of(context)!.tabCommunication),
+          BottomNavigationBarItem(icon: const Icon(Icons.history), label: AppLocalizations.of(context)!.tabLog),
         ],
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -81,6 +84,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
   final TextEditingController _sendPortController = TextEditingController(text: '12345');
   final TextEditingController _sendMessageController = TextEditingController();
   final List<String> _receivedLogs = [];
+  List<String> _sendHistory = [];
   final ScrollController _scrollController = ScrollController();
 
   RawDatagramSocket? _socket;
@@ -104,6 +108,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       _sendPortController.text = prefs.getString('sendPort') ?? '12345';
       _sendMessageController.text = prefs.getString('sendMessage') ?? '';
       _isHexMode = prefs.getBool('isHexMode') ?? false;
+      _sendHistory = prefs.getStringList('sendHistory') ?? [];
     });
   }
 
@@ -114,6 +119,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
     await prefs.setString('sendPort', _sendPortController.text);
     await prefs.setString('sendMessage', _sendMessageController.text);
     await prefs.setBool('isHexMode', _isHexMode);
+    await prefs.setStringList('sendHistory', _sendHistory);
   }
 
   @override
@@ -145,16 +151,17 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
         }
       }, onError: (e) {
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           setState(() {
-            _receivedLogs.add('受信エラー: $e');
+            _receivedLogs.add(l10n.receiveError(e.toString()));
           });
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('受信エラー: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(l10n.receiveError(e.toString()))));
         }
       }, onDone: () {
         if (mounted && _isReceiving) {
           _disconnect();
           setState(() {
-            _receivedLogs.add('ソケットが閉じられました');
+            _receivedLogs.add(AppLocalizations.of(context)!.socketClosed);
           });
         }
       });
@@ -169,8 +176,9 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
 
       setState(() {
         _isReceiving = true;
-        _receivedLogs.add('--- 接続開始 (ポート: $port) ---');
-        _receivedLogs.add('ログファイル: ${logFile.path}');
+        final l10n = AppLocalizations.of(context)!;
+        _receivedLogs.add(l10n.connectionStarted(port));
+        _receivedLogs.add(l10n.logFile(logFile.path));
       });
     } catch (e) {
       debugPrint('接続エラー: $e');
@@ -188,7 +196,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
     _isReceiving = false;
     if (mounted && _currentLogPath != null) {
       setState(() {
-        _receivedLogs.add('--- 切断 ---');
+        _receivedLogs.add(AppLocalizations.of(context)!.disconnected);
       });
     }
   }
@@ -232,7 +240,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       debugPrint('データ処理エラー: $e');
       if (mounted) {
         setState(() {
-          _receivedLogs.add('データ処理エラー: $e');
+          _receivedLogs.add(AppLocalizations.of(context)!.dataProcessingError(e.toString()));
         });
       }
     }
@@ -243,12 +251,22 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
 
     final address = _sendAddressController.text;
     final port = int.tryParse(_sendPortController.text);
+    final message = _sendMessageController.text;
     if (port == null) return;
+
+    // 履歴に追加 (重複を避け、最新を上にする)
+    if (message.isNotEmpty) {
+      _sendHistory.remove(message);
+      _sendHistory.insert(0, message);
+      if (_sendHistory.length > 20) {
+        _sendHistory = _sendHistory.sublist(0, 20);
+      }
+    }
 
     List<int> dataToSend;
     if (_isHexMode) {
       try {
-        final hexStr = _sendMessageController.text.replaceAll(RegExp(r'\s+'), '');
+        final hexStr = message.replaceAll(RegExp(r'\s+'), '');
         dataToSend = [];
         for (int i = 0; i < hexStr.length; i += 2) {
           dataToSend.add(int.parse(hexStr.substring(i, i + 2), radix: 16));
@@ -256,7 +274,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       } catch (e) {
         debugPrint('16進数パースエラー: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('16進数形式が正しくありません')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.hexParseError)));
         }
         return;
       }
@@ -272,7 +290,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       try {
         final addresses = await InternetAddress.lookup(address);
         if (addresses.isEmpty) {
-          throw Exception('アドレスが見つかりません');
+          throw Exception(AppLocalizations.of(context)!.addressNotFound);
         }
         // ソケットがIPv4でバインドされているため、可能であればIPv4アドレスを優先する
         destAddress = addresses.firstWhere(
@@ -283,7 +301,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       } catch (e) {
         debugPrint('宛先アドレス解決エラー: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('宛先アドレス不正: $address')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.invalidAddress(address))));
         }
         return;
       }
@@ -291,7 +309,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       // ポート番号のバリデーション
       if (port < 1 || port > 65535) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ポート番号は1-65535の間で指定してください')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.portRangeError)));
         }
         return;
       }
@@ -300,7 +318,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       debugPrint('UDP送信成功: $destAddress:$port');
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('送信完了'), duration: Duration(seconds: 1)));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.sendComplete), duration: const Duration(seconds: 1)));
       }
     } catch (e, st) {
       debugPrint('送信エラー: $e');
@@ -313,8 +331,9 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('UDP 通信')),
+      appBar: AppBar(title: Text(l10n.udpCommunication)),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -324,9 +343,10 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                 Expanded(
                   child: TextField(
                     controller: _receivePortController,
-                    decoration: const InputDecoration(labelText: '受信ポート'),
+                    decoration: InputDecoration(labelText: l10n.receivePort),
                     keyboardType: TextInputType.number,
                     enabled: !_isReceiving,
+                    style: const TextStyle(fontFamily: 'monospace'),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -335,7 +355,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _isReceiving ? Colors.red.shade100 : Colors.green.shade100,
                   ),
-                  child: Text(_isReceiving ? '切断' : '接続'),
+                  child: Text(_isReceiving ? l10n.disconnect : l10n.connect),
                 ),
               ],
             ),
@@ -369,7 +389,8 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                   flex: 2,
                   child: TextField(
                     controller: _sendAddressController,
-                    decoration: const InputDecoration(labelText: '宛先IP'),
+                    decoration: InputDecoration(labelText: l10n.destinationIp),
+                    style: const TextStyle(fontFamily: 'monospace'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -377,8 +398,9 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                   flex: 1,
                   child: TextField(
                     controller: _sendPortController,
-                    decoration: const InputDecoration(labelText: 'ポート'),
+                    decoration: InputDecoration(labelText: l10n.port),
                     keyboardType: TextInputType.number,
+                    style: const TextStyle(fontFamily: 'monospace'),
                   ),
                 ),
               ],
@@ -388,14 +410,38 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                 Expanded(
                   child: TextField(
                     controller: _sendMessageController,
+                    style: const TextStyle(fontFamily: 'monospace'),
                     decoration: InputDecoration(
-                      labelText: _isHexMode ? '送信データ (16進数: 00AA...)' : '送信テキスト',
+                      labelText: _isHexMode ? l10n.sendDataHex : l10n.sendText,
+                      suffixIcon: _sendHistory.isEmpty
+                          ? null
+                          : PopupMenuButton<String>(
+                              icon: const Icon(Icons.history, size: 20),
+                              tooltip: l10n.sendHistory,
+                              onSelected: (String value) {
+                                setState(() {
+                                  _sendMessageController.text = value;
+                                });
+                              },
+                              itemBuilder: (BuildContext context) {
+                                return _sendHistory.map((String choice) {
+                                  return PopupMenuItem<String>(
+                                    value: choice,
+                                    child: Text(
+                                      choice,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }).toList();
+                              },
+                            ),
                     ),
                   ),
                 ),
                 Column(
                   children: [
-                    const Text('16進数', style: TextStyle(fontSize: 10)),
+                    Text(l10n.hexMode, style: const TextStyle(fontSize: 10)),
                     Switch(
                       value: _isHexMode,
                       onChanged: (val) {
@@ -466,27 +512,28 @@ class _LogViewerPageState extends State<LogViewerPage> {
       });
     } catch (e) {
       setState(() {
-        _fileContent = 'エラー: $e';
+        _fileContent = AppLocalizations.of(context)!.error(e.toString());
       });
     }
   }
 
   Future<void> _deleteLogFile(File file) async {
+    final l10n = AppLocalizations.of(context)!;
     final fileName = p.basename(file.path);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('削除の確認'),
-        content: Text('ログファイル「$fileName」を削除しますか？'),
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.deleteMessage(fileName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('キャンセル'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('削除'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -497,12 +544,12 @@ class _LogViewerPageState extends State<LogViewerPage> {
         await file.delete();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('削除しました: $fileName')),
+            SnackBar(content: Text(l10n.deleted(fileName))),
           );
           if (_selectedFileName == fileName) {
             setState(() {
               _selectedFileName = null;
-              _fileContent = 'ログファイルを選択してください';
+              _fileContent = l10n.selectLogFile;
             });
           }
           await _refreshLogFiles();
@@ -510,7 +557,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('削除失敗: $e')),
+            SnackBar(content: Text(l10n.deleteFailed(e.toString()))),
           );
         }
       }
@@ -531,16 +578,17 @@ class _LogViewerPageState extends State<LogViewerPage> {
       }
     } catch (e) {
       setState(() {
-        _fileContent = 'エラー: $e';
+        _fileContent = AppLocalizations.of(context)!.error(e.toString());
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ログ表示'),
+        title: Text(l10n.logViewer),
         actions: [
           IconButton(
             onPressed: _refreshLogFiles,
@@ -561,7 +609,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
               border: Border(right: BorderSide(color: Colors.grey)),
             ),
             child: _logFiles.isEmpty
-                ? const Center(child: Text('ログなし', style: TextStyle(fontSize: 12)))
+                ? Center(child: Text(l10n.noLogs, style: const TextStyle(fontSize: 12)))
                 : ListView.builder(
                     itemCount: _logFiles.length,
                     itemBuilder: (context, index) {
@@ -594,7 +642,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
                   if (_selectedFileName != null)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Text('ファイル: $_selectedFileName', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      child: Text(l10n.file(_selectedFileName!), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     ),
                   Expanded(
                     child: Container(

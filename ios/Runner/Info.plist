@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>UDP通信によるデータの送受信とデバイス探索のためにローカルネットワークへのアクセスが必要です。</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_udp._tcp</string>
+	</array>
 </dict>
 </plist>
