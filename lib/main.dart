@@ -646,7 +646,7 @@ class LogViewerPage extends StatefulWidget {
 }
 
 class _LogViewerPageState extends State<LogViewerPage> {
-  String _fileContent = 'ログファイルを選択してください';
+  String _fileContent = '';
   String? _selectedFileName;
   List<File> _logFiles = [];
 
@@ -883,7 +883,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
                       ),
                       child: SingleChildScrollView(
                         child: Text(
-                          _fileContent,
+                          _selectedFileName == null ? l10n.selectLogFile : _fileContent,
                           style: logStyle,
                         ),
                       ),
