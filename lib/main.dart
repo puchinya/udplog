@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -676,24 +675,6 @@ class _LogViewerPageState extends State<LogViewerPage> {
     }
   }
 
-  Future<void> _pickAndLoadFile() async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        initialDirectory: directory.path,
-        type: FileType.any,
-      );
-
-      if (result != null && result.files.single.path != null) {
-        final file = File(result.files.single.path!);
-        await _loadLogFile(file);
-      }
-    } catch (e) {
-      setState(() {
-        _fileContent = AppLocalizations.of(context)!.error(e.toString());
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -762,10 +743,6 @@ class _LogViewerPageState extends State<LogViewerPage> {
               onPressed: refreshLogFiles,
               icon: const Icon(Icons.refresh),
             ),
-            IconButton(
-              onPressed: _pickAndLoadFile,
-              icon: const Icon(Icons.file_open),
-            ),
           ],
         ),
         body: fileList,
@@ -780,10 +757,6 @@ class _LogViewerPageState extends State<LogViewerPage> {
           IconButton(
             onPressed: refreshLogFiles,
             icon: const Icon(Icons.refresh),
-          ),
-          IconButton(
-            onPressed: _pickAndLoadFile,
-            icon: const Icon(Icons.file_open),
           ),
         ],
       ),
