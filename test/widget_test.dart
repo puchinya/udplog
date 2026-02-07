@@ -15,6 +15,7 @@ void main() {
     expect(find.text('UDP Comm'), findsOneWidget);
     expect(find.text('Receive Port'), findsOneWidget);
     expect(find.text('Connect'), findsOneWidget);
+    expect(find.byIcon(Icons.settings), findsOneWidget);
   });
 
   testWidgets('UDP Log App Japanese UI test', (WidgetTester tester) async {
@@ -34,5 +35,32 @@ void main() {
     expect(find.text('UDP 通信'), findsOneWidget);
     expect(find.text('受信ポート'), findsOneWidget);
     expect(find.text('接続'), findsOneWidget);
+  });
+
+  testWidgets('Font settings update test', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    // Go to settings tab
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Font Settings'), findsOneWidget);
+
+    // Initial font size should be 12
+    expect(find.text('12'), findsAtLeast(1));
+
+    // Change font size using slider
+    // The slider is in the middle of the screen usually, let's find it.
+    final sliderFinder = find.byType(Slider);
+    expect(sliderFinder, findsOneWidget);
+    
+    // Drag slider to the right
+    await tester.drag(sliderFinder, const Offset(100, 0));
+    await tester.pumpAndSettle();
+
+    // Font size should have changed from 12
+    expect(find.text('12'), findsNothing);
   });
 }

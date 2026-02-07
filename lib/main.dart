@@ -7,7 +7,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:udplog/l10n/app_localizations.dart';
 
@@ -40,32 +42,96 @@ class MainNavigationPage extends StatefulWidget {
   State<MainNavigationPage> createState() => _MainNavigationPageState();
 }
 
+class SettingsProvider extends InheritedWidget {
+  final String fontFamily;
+  final double fontSize;
+  final _MainNavigationPageState state;
+
+  const SettingsProvider({
+    super.key,
+    required this.fontFamily,
+    required this.fontSize,
+    required this.state,
+    required super.child,
+  });
+
+  static _MainNavigationPageState? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<SettingsProvider>()?.state;
+  }
+
+  @override
+  bool updateShouldNotify(SettingsProvider oldWidget) {
+    return fontFamily != oldWidget.fontFamily || fontSize != oldWidget.fontSize;
+  }
+}
+
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _selectedIndex = 0;
+  final GlobalKey<_LogViewerPageState> _logViewerKey = GlobalKey<_LogViewerPageState>();
 
-  static const List<Widget> _pages = [
-    UdpCommunicationPage(),
-    LogViewerPage(),
-  ];
+  String _fontFamily = 'monospace';
+  double _fontSize = 12.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFontSettings();
+  }
+
+  Future<void> _loadFontSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _fontFamily = prefs.getString('fontFamily') ?? 'monospace';
+      _fontSize = prefs.getDouble('fontSize') ?? 12.0;
+    });
+  }
+
+  Future<void> updateFontSettings(String family, double size) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('fontFamily', family);
+    await prefs.setDouble('fontSize', size);
+    setState(() {
+      _fontFamily = family;
+      _fontSize = size;
+    });
+  }
+
+  String get fontFamily => _fontFamily;
+  double get fontSize => _fontSize;
+
+  void _onTabTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 1) {
+      _logViewerKey.currentState?.refreshLogFiles();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.swap_horiz), label: AppLocalizations.of(context)!.tabCommunication),
-          BottomNavigationBarItem(icon: const Icon(Icons.history), label: AppLocalizations.of(context)!.tabLog),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+    return SettingsProvider(
+      fontFamily: _fontFamily,
+      fontSize: _fontSize,
+      state: this,
+      child: Scaffold(
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            const UdpCommunicationPage(),
+            LogViewerPage(key: _logViewerKey),
+            const SettingsPage(),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: [
+            BottomNavigationBarItem(icon: const Icon(Icons.swap_horiz), label: AppLocalizations.of(context)!.tabCommunication),
+            BottomNavigationBarItem(icon: const Icon(Icons.history), label: AppLocalizations.of(context)!.tabLog),
+            BottomNavigationBarItem(icon: const Icon(Icons.settings), label: AppLocalizations.of(context)!.tabSettings),
+          ],
+          currentIndex: _selectedIndex,
+          onTap: _onTabTapped,
+        ),
       ),
     );
   }
@@ -332,6 +398,12 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final navState = SettingsProvider.of(context);
+    final logStyle = TextStyle(
+      fontFamily: navState?.fontFamily ?? 'monospace',
+      fontSize: navState?.fontSize ?? 12,
+    );
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.udpCommunication)),
       body: Padding(
@@ -346,7 +418,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                     decoration: InputDecoration(labelText: l10n.receivePort),
                     keyboardType: TextInputType.number,
                     enabled: !_isReceiving,
-                    style: const TextStyle(fontFamily: 'monospace'),
+                    style: logStyle,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -375,7 +447,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                       child: Text(
                         _receivedLogs[index],
-                        style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                        style: logStyle,
                       ),
                     );
                   },
@@ -390,7 +462,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                   child: TextField(
                     controller: _sendAddressController,
                     decoration: InputDecoration(labelText: l10n.destinationIp),
-                    style: const TextStyle(fontFamily: 'monospace'),
+                    style: logStyle,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -400,7 +472,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                     controller: _sendPortController,
                     decoration: InputDecoration(labelText: l10n.port),
                     keyboardType: TextInputType.number,
-                    style: const TextStyle(fontFamily: 'monospace'),
+                    style: logStyle,
                   ),
                 ),
               ],
@@ -410,7 +482,7 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
                 Expanded(
                   child: TextField(
                     controller: _sendMessageController,
-                    style: const TextStyle(fontFamily: 'monospace'),
+                    style: logStyle,
                     decoration: InputDecoration(
                       labelText: _isHexMode ? l10n.sendDataHex : l10n.sendText,
                       suffixIcon: _sendHistory.isEmpty
@@ -480,10 +552,10 @@ class _LogViewerPageState extends State<LogViewerPage> {
   @override
   void initState() {
     super.initState();
-    _refreshLogFiles();
+    refreshLogFiles();
   }
 
-  Future<void> _refreshLogFiles() async {
+  Future<void> refreshLogFiles() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final entities = await directory.list().toList();
@@ -552,7 +624,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
               _fileContent = l10n.selectLogFile;
             });
           }
-          await _refreshLogFiles();
+          await refreshLogFiles();
         }
       } catch (e) {
         if (mounted) {
@@ -561,6 +633,17 @@ class _LogViewerPageState extends State<LogViewerPage> {
           );
         }
       }
+    }
+  }
+
+  Future<void> _shareLogFile(File file) async {
+    try {
+      await Share.shareXFiles([XFile(file.path)]);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.shareFailed(e.toString()))),
+      );
     }
   }
 
@@ -586,12 +669,18 @@ class _LogViewerPageState extends State<LogViewerPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final navState = SettingsProvider.of(context);
+    final logStyle = TextStyle(
+      fontFamily: navState?.fontFamily ?? 'monospace',
+      fontSize: navState?.fontSize ?? 12,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.logViewer),
         actions: [
           IconButton(
-            onPressed: _refreshLogFiles,
+            onPressed: refreshLogFiles,
             icon: const Icon(Icons.refresh),
           ),
           IconButton(
@@ -621,9 +710,20 @@ class _LogViewerPageState extends State<LogViewerPage> {
                           fileName.replaceFirst('udp_log_', '').replaceFirst('.txt', ''),
                           style: const TextStyle(fontSize: 12),
                         ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, size: 16, color: Colors.grey),
-                          onPressed: () => _deleteLogFile(file),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.share, size: 16, color: Colors.grey),
+                              onPressed: () => _shareLogFile(file),
+                              tooltip: l10n.share,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, size: 16, color: Colors.grey),
+                              onPressed: () => _deleteLogFile(file),
+                              tooltip: l10n.delete,
+                            ),
+                          ],
                         ),
                         selected: isSelected,
                         dense: true,
@@ -655,7 +755,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
                       child: SingleChildScrollView(
                         child: Text(
                           _fileContent,
-                          style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                          style: logStyle,
                         ),
                       ),
                     ),
@@ -663,6 +763,116 @@ class _LogViewerPageState extends State<LogViewerPage> {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  String _version = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPackageInfo();
+  }
+
+  Future<void> _loadPackageInfo() async {
+    final info = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = info.version;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final navState = SettingsProvider.of(context);
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.settings)),
+      body: ListView(
+        children: [
+          ListTile(
+            title: Text(l10n.fontSettings, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(l10n.fontFamily),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: DropdownButton<String>(
+                        value: navState?.fontFamily,
+                        isExpanded: true,
+                        items: const [
+                          DropdownMenuItem(value: 'monospace', child: Text('Monospace')),
+                          DropdownMenuItem(value: 'sans-serif', child: Text('Sans-serif')),
+                          DropdownMenuItem(value: 'serif', child: Text('Serif')),
+                        ],
+                        onChanged: (String? value) {
+                          if (value != null && navState != null) {
+                            setState(() {
+                              navState.updateFontSettings(value, navState.fontSize);
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text(l10n.fontSize),
+                    Expanded(
+                      child: Slider(
+                        value: navState?.fontSize ?? 12,
+                        min: 8,
+                        max: 24,
+                        divisions: 16,
+                        label: navState?.fontSize.round().toString(),
+                        onChanged: (double value) {
+                          if (navState != null) {
+                            setState(() {
+                              navState.updateFontSettings(navState.fontFamily, value);
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    Text(navState?.fontSize.round().toString() ?? '12'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: Text(l10n.licenses),
+            onTap: () {
+              showLicensePage(
+                context: context,
+                applicationName: l10n.appTitle,
+                applicationVersion: _version,
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.verified_user_outlined),
+            title: Text(l10n.version(_version)),
           ),
         ],
       ),
