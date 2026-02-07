@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -528,143 +529,170 @@ class _UdpCommunicationPageState extends State<UdpCommunicationPage> {
       fontSize: navState?.fontSize ?? 12,
     );
 
+    final bool isAndroid = !kIsWeb && Platform.isAndroid;
+
+    Widget content = Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisSize: isAndroid ? MainAxisSize.min : MainAxisSize.max,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _receivePortController,
+                  decoration: InputDecoration(labelText: l10n.receivePort),
+                  keyboardType: TextInputType.number,
+                  enabled: !_isReceiving,
+                  style: logStyle,
+                ),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: _isReceiving ? _disconnect : _connect,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isReceiving 
+                      ? (Theme.of(context).brightness == Brightness.dark ? Colors.red.shade900 : Colors.red.shade100)
+                      : (Theme.of(context).brightness == Brightness.dark ? Colors.green.shade900 : Colors.green.shade100),
+                  foregroundColor: _isReceiving
+                      ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.red.shade900)
+                      : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.green.shade900),
+                ),
+                child: Text(_isReceiving ? l10n.disconnect : l10n.connect),
+              ),
+            ],
+          ),
+          const Divider(),
+          isAndroid
+              ? Container(
+                  width: double.infinity,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: _receivedLogs.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                        child: Text(
+                          _receivedLogs[index],
+                          style: logStyle,
+                        ),
+                      );
+                    },
+                  ),
+                )
+              : Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Theme.of(context).dividerColor),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: _receivedLogs.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                          child: Text(
+                            _receivedLogs[index],
+                            style: logStyle,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+          const Divider(),
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _sendAddressController,
+                  decoration: InputDecoration(labelText: l10n.destinationIp),
+                  style: logStyle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 1,
+                child: TextField(
+                  controller: _sendPortController,
+                  decoration: InputDecoration(labelText: l10n.port),
+                  keyboardType: TextInputType.number,
+                  style: logStyle,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _sendMessageController,
+                  style: logStyle,
+                  decoration: InputDecoration(
+                    labelText: _isHexMode ? l10n.sendDataHex : l10n.sendText,
+                    suffixIcon: _sendHistory.isEmpty
+                        ? null
+                        : PopupMenuButton<String>(
+                            icon: const Icon(Icons.history, size: 20),
+                            tooltip: l10n.sendHistory,
+                            onSelected: (String value) {
+                              setState(() {
+                                _sendMessageController.text = value;
+                              });
+                            },
+                            itemBuilder: (BuildContext context) {
+                              return _sendHistory.map((String choice) {
+                                return PopupMenuItem<String>(
+                                  value: choice,
+                                  child: Text(
+                                    choice,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              }).toList();
+                            },
+                          ),
+                  ),
+                ),
+              ),
+              Column(
+                children: [
+                  Text(l10n.hexMode, style: const TextStyle(fontSize: 10)),
+                  Switch.adaptive(
+                    value: _isHexMode,
+                    onChanged: (val) {
+                      setState(() => _isHexMode = val);
+                      _saveSettings();
+                    },
+                  ),
+                ],
+              ),
+              IconButton(
+                onPressed: _isReceiving ? _sendData : null,
+                icon: const Icon(Icons.send),
+                color: _isReceiving ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.udpCommunication),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _receivePortController,
-                    decoration: InputDecoration(labelText: l10n.receivePort),
-                    keyboardType: TextInputType.number,
-                    enabled: !_isReceiving,
-                    style: logStyle,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _isReceiving ? _disconnect : _connect,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isReceiving 
-                        ? (Theme.of(context).brightness == Brightness.dark ? Colors.red.shade900 : Colors.red.shade100)
-                        : (Theme.of(context).brightness == Brightness.dark ? Colors.green.shade900 : Colors.green.shade100),
-                    foregroundColor: _isReceiving
-                        ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.red.shade900)
-                        : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.green.shade900),
-                  ),
-                  child: Text(_isReceiving ? l10n.disconnect : l10n.connect),
-                ),
-              ],
-            ),
-            const Divider(),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).dividerColor),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: _receivedLogs.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                      child: Text(
-                        _receivedLogs[index],
-                        style: logStyle,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const Divider(),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: _sendAddressController,
-                    decoration: InputDecoration(labelText: l10n.destinationIp),
-                    style: logStyle,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 1,
-                  child: TextField(
-                    controller: _sendPortController,
-                    decoration: InputDecoration(labelText: l10n.port),
-                    keyboardType: TextInputType.number,
-                    style: logStyle,
-                  ),
-                ),
-              ],
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _sendMessageController,
-                    style: logStyle,
-                    decoration: InputDecoration(
-                      labelText: _isHexMode ? l10n.sendDataHex : l10n.sendText,
-                      suffixIcon: _sendHistory.isEmpty
-                          ? null
-                          : PopupMenuButton<String>(
-                              icon: const Icon(Icons.history, size: 20),
-                              tooltip: l10n.sendHistory,
-                              onSelected: (String value) {
-                                setState(() {
-                                  _sendMessageController.text = value;
-                                });
-                              },
-                              itemBuilder: (BuildContext context) {
-                                return _sendHistory.map((String choice) {
-                                  return PopupMenuItem<String>(
-                                    value: choice,
-                                    child: Text(
-                                      choice,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                }).toList();
-                              },
-                            ),
-                    ),
-                  ),
-                ),
-                Column(
-                  children: [
-                    Text(l10n.hexMode, style: const TextStyle(fontSize: 10)),
-                    Switch.adaptive(
-                      value: _isHexMode,
-                      onChanged: (val) {
-                        setState(() => _isHexMode = val);
-                        _saveSettings();
-                      },
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: _isReceiving ? _sendData : null,
-                  icon: const Icon(Icons.send),
-                  color: _isReceiving ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+      body: isAndroid ? SingleChildScrollView(child: content) : content,
     );
   }
 }
