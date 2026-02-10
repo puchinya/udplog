@@ -38,6 +38,8 @@
   "deleteMessage": "ログファイル「{fileName}」を削除しますか？",
   "cancel": "キャンセル",
   "delete": "削除",
+  "deleteAllLogsConfirm": "すべてのログファイルを削除しますか？",
+  "deleteFileConfirm": "このログファイルを削除しますか？",
   "deleted": "削除しました: {fileName}",
   "deleteFailed": "削除失敗: {error}",
   "error": "エラー: {error}",

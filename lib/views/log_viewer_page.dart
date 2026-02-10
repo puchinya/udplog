@@ -31,7 +31,7 @@ class LogViewerPage extends ConsumerWidget {
                 context: context,
                 builder: (context) => AlertDialog.adaptive(
                   title: Text(l10n.confirmDelete),
-                  content: Text(l10n.confirmDelete),
+                  content: Text(l10n.deleteAllLogsConfirm),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -74,9 +74,42 @@ class LogViewerPage extends ConsumerWidget {
                         ),
                       );
                     },
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => viewModel.deleteFile(file),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.share),
+                          onPressed: () {
+                            final fileName = file.path.split(Platform.pathSeparator).last;
+                            Share.shareXFiles([XFile(file.path)], text: fileName);
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog.adaptive(
+                                title: Text(l10n.confirmDelete),
+                                content: Text(l10n.deleteFileConfirm),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text(l10n.cancel),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      viewModel.deleteFile(file);
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   );
                 },

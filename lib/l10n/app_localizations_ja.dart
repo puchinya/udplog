@@ -119,6 +119,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get delete => '削除';
 
   @override
+  String get deleteAllLogsConfirm => 'すべてのログファイルを削除しますか？';
+
+  @override
+  String get deleteFileConfirm => 'このログファイルを削除しますか？';
+
+  @override
   String deleted(String fileName) {
     return '削除しました: $fileName';
   }

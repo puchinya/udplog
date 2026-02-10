@@ -46,3 +46,4 @@ app.*.map.json
 
 /debug_output.txt
 /.output.txt
+/udp_log_*.txt

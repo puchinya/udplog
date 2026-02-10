@@ -119,6 +119,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
+  String get deleteAllLogsConfirm =>
+      'Are you sure you want to delete all log files?';
+
+  @override
+  String get deleteFileConfirm =>
+      'Are you sure you want to delete this log file?';
+
+  @override
   String deleted(String fileName) {
     return 'Deleted: $fileName';
   }

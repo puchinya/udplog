@@ -290,6 +290,18 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
+  /// No description provided for @deleteAllLogsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete all log files?'**
+  String get deleteAllLogsConfirm;
+
+  /// No description provided for @deleteFileConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this log file?'**
+  String get deleteFileConfirm;
+
   /// No description provided for @deleted.
   ///
   /// In en, this message translates to:
