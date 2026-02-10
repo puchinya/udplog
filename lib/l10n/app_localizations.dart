@@ -410,6 +410,18 @@ abstract class AppLocalizations {
   /// **'Prevent sleep during UDP reception'**
   String get preventSleepDuringUdp;
 
+  /// No description provided for @demoServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo Server'**
+  String get demoServer;
+
+  /// No description provided for @demoServerPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo Server Port'**
+  String get demoServerPort;
+
   /// No description provided for @licenses.
   ///
   /// In en, this message translates to:

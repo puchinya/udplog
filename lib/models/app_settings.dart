@@ -26,6 +26,8 @@ class AppSettings with _$AppSettings {
     @Default(ThemeMode.system) ThemeMode themeMode,
     @LocaleConverter() Locale? locale,
     @Default(true) bool preventSleepDuringUdp,
+    @Default(false) bool demoServerEnabled,
+    @Default('50050') String demoServerPort,
     @Default(false) bool initialized,
   }) = _AppSettings;
 

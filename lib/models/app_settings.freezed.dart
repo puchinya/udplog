@@ -26,6 +26,8 @@ mixin _$AppSettings {
   @LocaleConverter()
   Locale? get locale => throw _privateConstructorUsedError;
   bool get preventSleepDuringUdp => throw _privateConstructorUsedError;
+  bool get demoServerEnabled => throw _privateConstructorUsedError;
+  String get demoServerPort => throw _privateConstructorUsedError;
   bool get initialized => throw _privateConstructorUsedError;
 
   /// Serializes this AppSettings to a JSON map.
@@ -50,6 +52,8 @@ abstract class $AppSettingsCopyWith<$Res> {
     ThemeMode themeMode,
     @LocaleConverter() Locale? locale,
     bool preventSleepDuringUdp,
+    bool demoServerEnabled,
+    String demoServerPort,
     bool initialized,
   });
 }
@@ -73,6 +77,8 @@ class _$AppSettingsCopyWithImpl<$Res, $Val extends AppSettings>
     Object? themeMode = null,
     Object? locale = freezed,
     Object? preventSleepDuringUdp = null,
+    Object? demoServerEnabled = null,
+    Object? demoServerPort = null,
     Object? initialized = null,
   }) {
     return _then(
@@ -93,6 +99,14 @@ class _$AppSettingsCopyWithImpl<$Res, $Val extends AppSettings>
                 ? _value.preventSleepDuringUdp
                 : preventSleepDuringUdp // ignore: cast_nullable_to_non_nullable
                       as bool,
+            demoServerEnabled: null == demoServerEnabled
+                ? _value.demoServerEnabled
+                : demoServerEnabled // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            demoServerPort: null == demoServerPort
+                ? _value.demoServerPort
+                : demoServerPort // ignore: cast_nullable_to_non_nullable
+                      as String,
             initialized: null == initialized
                 ? _value.initialized
                 : initialized // ignore: cast_nullable_to_non_nullable
@@ -117,6 +131,8 @@ abstract class _$$AppSettingsImplCopyWith<$Res>
     ThemeMode themeMode,
     @LocaleConverter() Locale? locale,
     bool preventSleepDuringUdp,
+    bool demoServerEnabled,
+    String demoServerPort,
     bool initialized,
   });
 }
@@ -139,6 +155,8 @@ class __$$AppSettingsImplCopyWithImpl<$Res>
     Object? themeMode = null,
     Object? locale = freezed,
     Object? preventSleepDuringUdp = null,
+    Object? demoServerEnabled = null,
+    Object? demoServerPort = null,
     Object? initialized = null,
   }) {
     return _then(
@@ -159,6 +177,14 @@ class __$$AppSettingsImplCopyWithImpl<$Res>
             ? _value.preventSleepDuringUdp
             : preventSleepDuringUdp // ignore: cast_nullable_to_non_nullable
                   as bool,
+        demoServerEnabled: null == demoServerEnabled
+            ? _value.demoServerEnabled
+            : demoServerEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        demoServerPort: null == demoServerPort
+            ? _value.demoServerPort
+            : demoServerPort // ignore: cast_nullable_to_non_nullable
+                  as String,
         initialized: null == initialized
             ? _value.initialized
             : initialized // ignore: cast_nullable_to_non_nullable
@@ -176,6 +202,8 @@ class _$AppSettingsImpl implements _AppSettings {
     this.themeMode = ThemeMode.system,
     @LocaleConverter() this.locale,
     this.preventSleepDuringUdp = true,
+    this.demoServerEnabled = false,
+    this.demoServerPort = '12345',
     this.initialized = false,
   });
 
@@ -196,11 +224,17 @@ class _$AppSettingsImpl implements _AppSettings {
   final bool preventSleepDuringUdp;
   @override
   @JsonKey()
+  final bool demoServerEnabled;
+  @override
+  @JsonKey()
+  final String demoServerPort;
+  @override
+  @JsonKey()
   final bool initialized;
 
   @override
   String toString() {
-    return 'AppSettings(fontSize: $fontSize, themeMode: $themeMode, locale: $locale, preventSleepDuringUdp: $preventSleepDuringUdp, initialized: $initialized)';
+    return 'AppSettings(fontSize: $fontSize, themeMode: $themeMode, locale: $locale, preventSleepDuringUdp: $preventSleepDuringUdp, demoServerEnabled: $demoServerEnabled, demoServerPort: $demoServerPort, initialized: $initialized)';
   }
 
   @override
@@ -215,6 +249,10 @@ class _$AppSettingsImpl implements _AppSettings {
             (identical(other.locale, locale) || other.locale == locale) &&
             (identical(other.preventSleepDuringUdp, preventSleepDuringUdp) ||
                 other.preventSleepDuringUdp == preventSleepDuringUdp) &&
+            (identical(other.demoServerEnabled, demoServerEnabled) ||
+                other.demoServerEnabled == demoServerEnabled) &&
+            (identical(other.demoServerPort, demoServerPort) ||
+                other.demoServerPort == demoServerPort) &&
             (identical(other.initialized, initialized) ||
                 other.initialized == initialized));
   }
@@ -227,6 +265,8 @@ class _$AppSettingsImpl implements _AppSettings {
     themeMode,
     locale,
     preventSleepDuringUdp,
+    demoServerEnabled,
+    demoServerPort,
     initialized,
   );
 
@@ -250,6 +290,8 @@ abstract class _AppSettings implements AppSettings {
     final ThemeMode themeMode,
     @LocaleConverter() final Locale? locale,
     final bool preventSleepDuringUdp,
+    final bool demoServerEnabled,
+    final String demoServerPort,
     final bool initialized,
   }) = _$AppSettingsImpl;
 
@@ -265,6 +307,10 @@ abstract class _AppSettings implements AppSettings {
   Locale? get locale;
   @override
   bool get preventSleepDuringUdp;
+  @override
+  bool get demoServerEnabled;
+  @override
+  String get demoServerPort;
   @override
   bool get initialized;
 

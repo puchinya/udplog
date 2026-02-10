@@ -14,6 +14,8 @@ _$AppSettingsImpl _$$AppSettingsImplFromJson(Map<String, dynamic> json) =>
           ThemeMode.system,
       locale: const LocaleConverter().fromJson(json['locale'] as String?),
       preventSleepDuringUdp: json['preventSleepDuringUdp'] as bool? ?? true,
+      demoServerEnabled: json['demoServerEnabled'] as bool? ?? false,
+      demoServerPort: json['demoServerPort'] as String? ?? '12345',
       initialized: json['initialized'] as bool? ?? false,
     );
 
@@ -23,6 +25,8 @@ Map<String, dynamic> _$$AppSettingsImplToJson(_$AppSettingsImpl instance) =>
       'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
       'locale': const LocaleConverter().toJson(instance.locale),
       'preventSleepDuringUdp': instance.preventSleepDuringUdp,
+      'demoServerEnabled': instance.demoServerEnabled,
+      'demoServerPort': instance.demoServerPort,
       'initialized': instance.initialized,
     };
 

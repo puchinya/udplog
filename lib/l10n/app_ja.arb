@@ -58,6 +58,8 @@
   "themeLight": "ライト",
   "themeDark": "ダーク",
   "preventSleepDuringUdp": "UDP受信中の端末のスリープ禁止",
+  "demoServer": "デモサーバー",
+  "demoServerPort": "デモサーバーポート",
   "licenses": "オープンソースライセンス",
   "version": "バージョン: {version}"
 }

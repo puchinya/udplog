@@ -189,6 +189,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get preventSleepDuringUdp => 'Prevent sleep during UDP reception';
 
   @override
+  String get demoServer => 'Demo Server';
+
+  @override
+  String get demoServerPort => 'Demo Server Port';
+
+  @override
   String get licenses => 'Open Source Licenses';
 
   @override

@@ -6,7 +6,7 @@ part of 'udp_view_model.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$udpViewModelHash() => r'95c6dd1f33f80691bcadadb01abce262f73c4e96';
+String _$udpViewModelHash() => r'3febc4f49715878efadecec11277cf365ddfddbb';
 
 /// See also [UdpViewModel].
 @ProviderFor(UdpViewModel)

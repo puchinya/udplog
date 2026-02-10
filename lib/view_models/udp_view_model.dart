@@ -8,13 +8,16 @@ import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../models/app_settings.dart';
 import '../models/udp_state.dart';
+import 'app_settings_view_model.dart';
 
 part 'udp_view_model.g.dart';
 
 @Riverpod(keepAlive: true)
 class UdpViewModel extends _$UdpViewModel {
   RawDatagramSocket? _socket;
+  RawDatagramSocket? _demoSocket;
   IOSink? _logSink;
 
   @override
@@ -78,11 +81,22 @@ class UdpViewModel extends _$UdpViewModel {
     if (state.isReceiving) {
       _disconnect();
     } else {
-      await _connect(preventSleep: preventSleep, onError: onError);
+      final settings = ref.read(appSettingsViewModelProvider);
+      await _connect(
+        preventSleep: preventSleep,
+        demoServerEnabled: settings.demoServerEnabled,
+        demoServerPort: settings.demoServerPort,
+        onError: onError,
+      );
     }
   }
 
-  Future<void> _connect({bool preventSleep = true, Function(String)? onError}) async {
+  Future<void> _connect({
+    bool preventSleep = true,
+    bool demoServerEnabled = false,
+    String demoServerPort = '12345',
+    Function(String)? onError,
+  }) async {
     final port = int.tryParse(state.receivePort);
     if (port == null) return;
 
@@ -106,6 +120,27 @@ class UdpViewModel extends _$UdpViewModel {
           _disconnect();
         }
       });
+
+      // Demo server setup
+      if (demoServerEnabled) {
+        final dPort = int.tryParse(demoServerPort);
+        if (dPort != null) {
+          try {
+            _demoSocket = await RawDatagramSocket.bind(InternetAddress.loopbackIPv4, dPort);
+            _demoSocket!.listen((RawSocketEvent event) {
+              if (event == RawSocketEvent.read) {
+                final datagram = _demoSocket!.receive();
+                if (datagram != null) {
+                  _demoSocket!.send(datagram.data, datagram.address, datagram.port);
+                }
+              }
+            });
+          } catch (e) {
+            // If demo server fails to start, we might want to log it but not fail the main connection
+            print('Failed to start demo server: $e');
+          }
+        }
+      }
 
       final directory = await getApplicationDocumentsDirectory();
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
@@ -158,6 +193,8 @@ class UdpViewModel extends _$UdpViewModel {
   void _disconnect() {
     _socket?.close();
     _socket = null;
+    _demoSocket?.close();
+    _demoSocket = null;
     if (_logSink != null) {
       final now = DateTime.now();
       final timeStr = DateFormat('HH:mm:ss.SSS').format(now);

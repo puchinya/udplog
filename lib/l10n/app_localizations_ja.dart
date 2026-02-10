@@ -187,6 +187,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get preventSleepDuringUdp => 'UDP受信中の端末のスリープ禁止';
 
   @override
+  String get demoServer => 'デモサーバー';
+
+  @override
+  String get demoServerPort => 'デモサーバーポート';
+
+  @override
   String get licenses => 'オープンソースライセンス';
 
   @override

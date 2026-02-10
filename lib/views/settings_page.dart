@@ -139,6 +139,41 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           },
         ),
         const Divider(),
+        SwitchListTile.adaptive(
+          title: Text(l10n.demoServer),
+          value: settings.demoServerEnabled,
+          onChanged: (val) {
+            viewModel.updateDemoServerEnabled(val);
+          },
+        ),
+        if (settings.demoServerEnabled)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: [
+                Text(l10n.demoServerPort),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: '12345',
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (val) {
+                      viewModel.updateDemoServerPort(val);
+                    },
+                    controller: TextEditingController(text: settings.demoServerPort)
+                      ..selection = TextSelection.fromPosition(
+                        TextPosition(offset: settings.demoServerPort.length),
+                      ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        const Divider(),
         ListTile(
           leading: Icon(isIOS ? CupertinoIcons.doc_text : Icons.description),
           title: Text(l10n.licenses),

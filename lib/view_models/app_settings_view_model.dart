@@ -18,12 +18,16 @@ class AppSettingsViewModel extends _$AppSettingsViewModel {
     final fontSize = prefs.getDouble('fontSize') ?? 12.0;
     final themeIndex = prefs.getInt('themeMode') ?? ThemeMode.system.index;
     final preventSleepDuringUdp = prefs.getBool('preventSleepDuringUdp') ?? true;
+    final demoServerEnabled = prefs.getBool('demoServerEnabled') ?? false;
+    final demoServerPort = prefs.getString('demoServerPort') ?? '12345';
     final languageCode = prefs.getString('languageCode');
 
     state = state.copyWith(
       fontSize: fontSize,
       themeMode: ThemeMode.values[themeIndex],
       preventSleepDuringUdp: preventSleepDuringUdp,
+      demoServerEnabled: demoServerEnabled,
+      demoServerPort: demoServerPort,
       locale: (languageCode != null && languageCode.isNotEmpty) ? Locale(languageCode) : null,
       initialized: true,
     );
@@ -55,5 +59,17 @@ class AppSettingsViewModel extends _$AppSettingsViewModel {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('preventSleepDuringUdp', value);
     state = state.copyWith(preventSleepDuringUdp: value);
+  }
+
+  Future<void> updateDemoServerEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('demoServerEnabled', value);
+    state = state.copyWith(demoServerEnabled: value);
+  }
+
+  Future<void> updateDemoServerPort(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('demoServerPort', value);
+    state = state.copyWith(demoServerPort: value);
   }
 }
