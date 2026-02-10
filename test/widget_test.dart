@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +20,13 @@ void main() {
     expect(find.text('UDP Comm'), findsOneWidget);
     expect(find.text('Receive Port'), findsOneWidget);
     expect(find.text('Connect'), findsOneWidget);
-    expect(find.byIcon(Icons.settings), findsOneWidget);
+    
+    final bool isIOS = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+    if (isIOS) {
+      expect(find.byIcon(CupertinoIcons.settings), findsOneWidget);
+    } else {
+      expect(find.byIcon(Icons.settings), findsOneWidget);
+    }
   });
 
   testWidgets('UDPLog Japanese UI test', (WidgetTester tester) async {
@@ -47,10 +56,19 @@ void main() {
     await tester.pumpAndSettle();
 
     // Go to settings tab
-    await tester.tap(find.byIcon(Icons.settings));
+    final bool isIOS = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+    if (isIOS) {
+      await tester.tap(find.byIcon(CupertinoIcons.settings));
+    } else {
+      await tester.tap(find.byIcon(Icons.settings));
+    }
     await tester.pumpAndSettle();
 
-    expect(find.text('Font Size'), findsOneWidget);
+    if (isIOS) {
+      expect(find.text('FONT SIZE'), findsOneWidget);
+    } else {
+      expect(find.text('Font Size'), findsOneWidget);
+    }
 
     // Initial font size should be 12
     expect(find.text('12'), findsAtLeast(1));

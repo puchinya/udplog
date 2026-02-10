@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
@@ -27,6 +30,44 @@ class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final bool isIOS = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+
+    if (isIOS) {
+      return CupertinoTabScaffold(
+        tabBar: CupertinoTabBar(
+          items: [
+            BottomNavigationBarItem(
+              icon: const Icon(CupertinoIcons.shuffle),
+              label: l10n.tabCommunication,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(CupertinoIcons.doc_text),
+              label: l10n.tabLog,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(CupertinoIcons.settings),
+              label: l10n.tabSettings,
+            ),
+          ],
+          onTap: _onTabTapped,
+          currentIndex: _selectedIndex,
+        ),
+        tabBuilder: (context, index) {
+          switch (index) {
+            case 0:
+              return const CupertinoPageScaffold(child: Material(child: UdpCommunicationPage()));
+            case 1:
+              return const CupertinoPageScaffold(child: Material(child: LogViewerPage()));
+            case 2:
+              return const CupertinoPageScaffold(child: Material(child: SettingsPage()));
+            default:
+              return const CupertinoPageScaffold(child: Material(child: UdpCommunicationPage()));
+          }
+        },
+      );
+    }
+
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
@@ -36,14 +77,23 @@ class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
           SettingsPage(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.swap_horiz), label: AppLocalizations.of(context)!.tabCommunication),
-          BottomNavigationBarItem(icon: const Icon(Icons.history), label: AppLocalizations.of(context)!.tabLog),
-          BottomNavigationBarItem(icon: const Icon(Icons.settings), label: AppLocalizations.of(context)!.tabSettings),
+      bottomNavigationBar: NavigationBar(
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.swap_horiz),
+            label: l10n.tabCommunication,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.history),
+            label: l10n.tabLog,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.settings),
+            label: l10n.tabSettings,
+          ),
         ],
-        currentIndex: _selectedIndex,
-        onTap: _onTabTapped,
+        selectedIndex: _selectedIndex,
+        onDestinationSelected: _onTabTapped,
       ),
     );
   }

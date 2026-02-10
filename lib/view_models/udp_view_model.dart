@@ -242,7 +242,24 @@ class UdpViewModel extends _$UdpViewModel {
         data = utf8.encode(message);
       }
 
-      _socket!.send(data, InternetAddress(address), port);
+      // Resolve address
+      InternetAddress? targetAddress;
+      try {
+        final addresses = await InternetAddress.lookup(address);
+        if (addresses.isNotEmpty) {
+          targetAddress = addresses.first;
+        }
+      } catch (e) {
+        if (onError != null) onError(e.toString());
+        return;
+      }
+
+      if (targetAddress == null) {
+        if (onError != null) onError('Address not found');
+        return;
+      }
+
+      _socket!.send(data, targetAddress, port);
 
       final now = DateTime.now();
       final logEntry = UdpMessage(

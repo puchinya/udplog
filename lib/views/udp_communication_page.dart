@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,6 +54,30 @@ class _UdpCommunicationPageState extends ConsumerState<UdpCommunicationPage> {
     });
   }
 
+  void _showError(String message) {
+    if (!mounted) return;
+    final bool isIOS = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+    if (isIOS) {
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: Text(AppLocalizations.of(context)!.error('')),
+          content: Text(message),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -89,12 +114,12 @@ class _UdpCommunicationPageState extends ConsumerState<UdpCommunicationPage> {
       fontSize: settings.fontSize,
     );
 
-    final bool isAndroid = !kIsWeb && Platform.isAndroid;
+    final bool isIOS = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
 
     Widget content = Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
-        mainAxisSize: isAndroid ? MainAxisSize.min : MainAxisSize.max,
+        mainAxisSize: !kIsWeb && Platform.isAndroid ? MainAxisSize.min : MainAxisSize.max,
         children: [
           Row(
             children: [
@@ -111,7 +136,7 @@ class _UdpCommunicationPageState extends ConsumerState<UdpCommunicationPage> {
               ElevatedButton(
                 onPressed: () => viewModel.toggleConnection(
                   preventSleep: settings.preventSleepDuringUdp,
-                  onError: (err) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err))),
+                  onError: _showError,
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: udpState.isReceiving 
@@ -120,6 +145,10 @@ class _UdpCommunicationPageState extends ConsumerState<UdpCommunicationPage> {
                   foregroundColor: udpState.isReceiving
                       ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.red.shade900)
                       : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.green.shade900),
+                ).copyWith(
+                  mouseCursor: WidgetStateProperty.resolveWith<MouseCursor>(
+                    (states) => states.contains(WidgetState.disabled) ? SystemMouseCursors.basic : SystemMouseCursors.click,
+                  ),
                 ),
                 child: Text(udpState.isReceiving ? l10n.disconnect : l10n.connect),
               ),
@@ -238,27 +267,51 @@ class _UdpCommunicationPageState extends ConsumerState<UdpCommunicationPage> {
               Column(
                 children: [
                   Text(l10n.hexMode, style: const TextStyle(fontSize: 10)),
-                  Switch.adaptive(
-                    value: udpState.isHexMode,
-                    onChanged: viewModel.updateIsHexMode,
+                  SizedBox(
+                    height: 44,
+                    width: 44,
+                    child: Center(
+                      child: Switch.adaptive(
+                        value: udpState.isHexMode,
+                        onChanged: viewModel.updateIsHexMode,
+                      ),
+                    ),
                   ),
                 ],
               ),
-              IconButton(
-                onPressed: udpState.isReceiving 
-                    ? () => viewModel.sendData(
-                        onError: (err) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err))),
-                        hexErrorLabel: l10n.hexParseError,
-                      )
-                    : null,
-                icon: const Icon(Icons.send),
-                color: udpState.isReceiving ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: IconButton(
+                  onPressed: udpState.isReceiving 
+                      ? () => viewModel.sendData(
+                          onError: _showError,
+                          hexErrorLabel: l10n.hexParseError,
+                        )
+                      : null,
+                  icon: Icon(isIOS ? CupertinoIcons.paperplane_fill : Icons.send),
+                  color: udpState.isReceiving ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
+                ),
               ),
             ],
           ),
         ],
       ),
     );
+
+    if (isIOS) {
+      return CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(
+          middle: Text(l10n.udpCommunication),
+          trailing: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: viewModel.clearLogs,
+            child: const Icon(CupertinoIcons.delete),
+          ),
+        ),
+        child: SafeArea(child: Material(child: content)),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -271,7 +324,7 @@ class _UdpCommunicationPageState extends ConsumerState<UdpCommunicationPage> {
           ),
         ],
       ),
-      body: isAndroid ? SingleChildScrollView(child: SizedBox(height: MediaQuery.of(context).size.height - 150, child: content)) : content,
+      body: !kIsWeb && Platform.isAndroid ? SingleChildScrollView(child: SizedBox(height: MediaQuery.of(context).size.height - 150, child: content)) : content,
     );
   }
 }
