@@ -206,19 +206,22 @@ class LogDetailView extends ConsumerWidget {
       fontSize: settings.fontSize,
     );
 
-    Widget content = Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).dividerColor),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: SingleChildScrollView(
-          child: Text(
-            state.fileContent,
-            style: logStyle,
+    Widget content = Material(
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(context).dividerColor),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: SingleChildScrollView(
+            child: Text(
+              state.fileContent,
+              style: logStyle,
+            ),
           ),
         ),
       ),
