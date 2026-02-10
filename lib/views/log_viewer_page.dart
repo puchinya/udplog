@@ -60,6 +60,7 @@ class LogViewerPage extends ConsumerWidget {
                           icon: Icon(isIOS ? CupertinoIcons.share : Icons.share),
                           onPressed: () {
                             final fileName = file.path.split(Platform.pathSeparator).last;
+                            // ignore: deprecated_member_use
                             Share.shareXFiles([XFile(file.path)], text: fileName);
                           },
                         ),
@@ -230,6 +231,7 @@ class LogDetailView extends ConsumerWidget {
           trailing: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () {
+              // ignore: deprecated_member_use
               Share.shareXFiles([XFile(file.path)], text: fileName);
             },
             child: const Icon(CupertinoIcons.share),
@@ -246,6 +248,7 @@ class LogDetailView extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
+              // ignore: deprecated_member_use
               Share.shareXFiles([XFile(file.path)], text: fileName);
             },
           ),

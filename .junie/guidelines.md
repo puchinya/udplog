@@ -61,7 +61,7 @@ Appleの審査を通過するため、一貫性と直感性を最優先する。
    * ダークモードへの完全対応。
    * 画像アセットはマルチ解像度（@2x, @3x）を想定したコードにせよ。
 
-## 4. 出力フォーマット
+### 出力フォーマット
 1. **Refactored Code**: 修正後の完全なDartコード。
 2. **Key Changes**: 変更の根拠となったガイドラインの解説。
 3. **Review Tips**: 審査時に指摘されやすいポイントへの具体的アドバイス。
@@ -69,3 +69,6 @@ Appleの審査を通過するため、一貫性と直感性を最優先する。
 ## Code Style
 - Use defining variables for colors/text styles.
 - Extract complex widgets into smaller components.
+
+## その他
+- flutter analyzeの指摘は全て修正すること

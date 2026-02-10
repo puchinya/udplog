@@ -117,7 +117,6 @@ class UdpViewModel extends _$UdpViewModel {
       final connectionMsg = '--- Connection Started (Port: $port) ---';
       _logSink?.writeln('[$timeStr] $connectionMsg');
 
-      final logFileMsgKey = 'logFile';
       final logFileMsgFile = 'Log file: $logFileName';
       _logSink?.writeln('[$timeStr] $logFileMsgFile');
 
