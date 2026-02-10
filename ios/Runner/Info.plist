@@ -37,6 +37,8 @@
 		</array>
 		<key>NSLocalNetworkUsageDescription</key>
 		<string>UDP通信によるデータの送受信のためにローカルネットワークへのアクセスが必要です。</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>ログファイルの共有や保存のためにフォトライブラリへのアクセスが必要です。</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>
