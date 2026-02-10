@@ -185,7 +185,16 @@ class UdpViewModel extends _$UdpViewModel {
         ],
       );
     } catch (e) {
-      if (onError != null) onError(e.toString());
+      if (kDebugMode) {
+        debugPrint('Connection error: $e');
+      }
+      if (onError != null) {
+        String msg = e.toString();
+        if (e is SocketException) {
+          msg = 'Socket Error: ${e.message}\nOS Error: ${e.osError?.message ?? 'Unknown'}';
+        }
+        onError(msg);
+      }
     }
   }
 

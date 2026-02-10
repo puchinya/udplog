@@ -56,13 +56,21 @@ class LogViewerPage extends ConsumerWidget {
                       SizedBox(
                         width: 44,
                         height: 44,
-                        child: IconButton(
-                          icon: Icon(isIOS ? CupertinoIcons.share : Icons.share),
-                          onPressed: () {
-                            final fileName = file.path.split(Platform.pathSeparator).last;
-                            // ignore: deprecated_member_use
-                            Share.shareXFiles([XFile(file.path)], text: fileName);
-                          },
+                        child: Builder(
+                          builder: (context) => IconButton(
+                            icon: Icon(isIOS ? CupertinoIcons.share : Icons.share),
+                            onPressed: () {
+                              final box = context.findRenderObject() as RenderBox?;
+                              final rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+                              final fileName = file.path.split(Platform.pathSeparator).last;
+                              // ignore: deprecated_member_use
+                              Share.shareXFiles(
+                                [XFile(file.path)],
+                                text: fileName,
+                                sharePositionOrigin: rect,
+                              );
+                            },
+                          ),
                         ),
                       ),
                       SizedBox(
@@ -231,14 +239,22 @@ class LogDetailView extends ConsumerWidget {
       return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           middle: Text(fileName),
-          trailing: CupertinoButton(
+          trailing: Builder(
+          builder: (context) => CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () {
+              final box = context.findRenderObject() as RenderBox?;
+              final rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
               // ignore: deprecated_member_use
-              Share.shareXFiles([XFile(file.path)], text: fileName);
+              Share.shareXFiles(
+                [XFile(file.path)],
+                text: fileName,
+                sharePositionOrigin: rect,
+              );
             },
             child: const Icon(CupertinoIcons.share),
           ),
+        ),
         ),
         child: SafeArea(child: content),
       );
@@ -248,12 +264,20 @@ class LogDetailView extends ConsumerWidget {
       appBar: AppBar(
         title: Text(fileName),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              // ignore: deprecated_member_use
-              Share.shareXFiles([XFile(file.path)], text: fileName);
-            },
+          Builder(
+            builder: (context) => IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: () {
+                final box = context.findRenderObject() as RenderBox?;
+                final rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+                // ignore: deprecated_member_use
+                Share.shareXFiles(
+                  [XFile(file.path)],
+                  text: fileName,
+                  sharePositionOrigin: rect,
+                );
+              },
+            ),
           ),
         ],
       ),
