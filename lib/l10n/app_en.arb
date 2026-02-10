@@ -124,7 +124,7 @@
   "languageEn": "English",
   "languageJa": "Japanese",
   "theme": "Theme",
-  "themeSystem": "System Default",
+  "themeSystem": "Follow OS",
   "themeLight": "Light",
   "themeDark": "Dark",
   "preventSleepDuringUdp": "Prevent sleep during UDP reception",

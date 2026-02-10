@@ -389,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @themeSystem.
   ///
   /// In en, this message translates to:
-  /// **'System Default'**
+  /// **'Follow OS'**
   String get themeSystem;
 
   /// No description provided for @themeLight.

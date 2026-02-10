@@ -54,7 +54,7 @@
   "languageEn": "English",
   "languageJa": "日本語",
   "theme": "テーマ",
-  "themeSystem": "システム設定に従う",
+  "themeSystem": "OSの設定に従う",
   "themeLight": "ライト",
   "themeDark": "ダーク",
   "preventSleepDuringUdp": "UDP受信中の端末のスリープ禁止",
