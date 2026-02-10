@@ -15,7 +15,7 @@ _$AppSettingsImpl _$$AppSettingsImplFromJson(Map<String, dynamic> json) =>
       locale: const LocaleConverter().fromJson(json['locale'] as String?),
       preventSleepDuringUdp: json['preventSleepDuringUdp'] as bool? ?? true,
       demoServerEnabled: json['demoServerEnabled'] as bool? ?? false,
-      demoServerPort: json['demoServerPort'] as String? ?? '12345',
+      demoServerPort: json['demoServerPort'] as String? ?? '50050',
       initialized: json['initialized'] as bool? ?? false,
     );
 

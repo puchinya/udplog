@@ -195,6 +195,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get demoServerPort => 'Demo Server Port';
 
   @override
+  String get done => 'Done';
+
+  @override
   String get licenses => 'Open Source Licenses';
 
   @override

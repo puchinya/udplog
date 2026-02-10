@@ -551,7 +551,7 @@ class _$UdpStateImpl implements _UdpState {
     this.isReceiving = false,
     this.receivePort = '12345',
     this.sendAddress = '127.0.0.1',
-    this.sendPort = '12345',
+    this.sendPort = '50050',
     this.sendMessage = '',
     this.isHexMode = false,
     final List<String> sendHistory = const [],

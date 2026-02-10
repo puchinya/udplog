@@ -19,7 +19,7 @@ class AppSettingsViewModel extends _$AppSettingsViewModel {
     final themeIndex = prefs.getInt('themeMode') ?? ThemeMode.system.index;
     final preventSleepDuringUdp = prefs.getBool('preventSleepDuringUdp') ?? true;
     final demoServerEnabled = prefs.getBool('demoServerEnabled') ?? false;
-    final demoServerPort = prefs.getString('demoServerPort') ?? '12345';
+    final demoServerPort = prefs.getString('demoServerPort') ?? '50050';
     final languageCode = prefs.getString('languageCode');
 
     state = state.copyWith(

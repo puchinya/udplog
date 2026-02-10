@@ -203,7 +203,7 @@ class _$AppSettingsImpl implements _AppSettings {
     @LocaleConverter() this.locale,
     this.preventSleepDuringUdp = true,
     this.demoServerEnabled = false,
-    this.demoServerPort = '12345',
+    this.demoServerPort = '50050',
     this.initialized = false,
   });
 

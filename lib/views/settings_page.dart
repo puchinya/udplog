@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../l10n/app_localizations.dart';
 import '../view_models/app_settings_view_model.dart';
@@ -16,11 +17,18 @@ class SettingsPage extends ConsumerStatefulWidget {
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   String _version = '';
+  final FocusNode _demoServerPortFocus = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _loadPackageInfo();
+  }
+
+  @override
+  void dispose() {
+    _demoServerPortFocus.dispose();
+    super.dispose();
   }
 
   Future<void> _loadPackageInfo() async {
@@ -39,8 +47,39 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final viewModel = ref.read(appSettingsViewModelProvider.notifier);
     final bool isIOS = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
 
-    Widget content = ListView(
-      children: [
+    KeyboardActionsConfig buildKeyboardActionsConfig(BuildContext context) {
+      return KeyboardActionsConfig(
+        keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
+        keyboardBarColor: isIOS ? CupertinoColors.systemGrey6.resolveFrom(context) : Colors.grey[200],
+        actions: [
+          KeyboardActionsItem(
+            focusNode: _demoServerPortFocus,
+            toolbarButtons: [
+              (node) {
+                return GestureDetector(
+                  onTap: () => node.unfocus(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      l10n.done,
+                      style: TextStyle(
+                        color: isIOS ? CupertinoColors.activeBlue : Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            ],
+          ),
+        ],
+      );
+    }
+
+    Widget content = KeyboardActions(
+      config: buildKeyboardActionsConfig(context),
+      child: ListView(
+        children: [
         if (isIOS)
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 20, bottom: 8),
@@ -155,6 +194,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: TextField(
+                    focusNode: _demoServerPortFocus,
                     decoration: InputDecoration(
                       hintText: '12345',
                       isDense: true,
@@ -189,6 +229,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           title: Text(l10n.version(settings.initialized ? _version : '')),
         ),
       ],
+    ),
     );
 
     if (isIOS) {

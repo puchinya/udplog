@@ -32,6 +32,7 @@ class MyApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: settings.locale,
+      debugShowCheckedModeBanner: false,
       localeResolutionCallback: (locale, supportedLocales) {
         if (settings.locale != null) return settings.locale;
         if (locale != null) {

@@ -26,7 +26,7 @@ class UdpState with _$UdpState {
     @Default(false) bool isReceiving,
     @Default('12345') String receivePort,
     @Default('127.0.0.1') String sendAddress,
-    @Default('12345') String sendPort,
+    @Default('50050') String sendPort,
     @Default('') String sendMessage,
     @Default(false) bool isHexMode,
     @Default([]) List<String> sendHistory,

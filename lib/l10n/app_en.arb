@@ -130,6 +130,7 @@
   "preventSleepDuringUdp": "Prevent sleep during UDP reception",
   "demoServer": "Demo Server",
   "demoServerPort": "Demo Server Port",
+  "done": "Done",
   "licenses": "Open Source Licenses",
   "version": "Version: {version}",
   "@version": {

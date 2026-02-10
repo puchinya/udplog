@@ -422,6 +422,12 @@ abstract class AppLocalizations {
   /// **'Demo Server Port'**
   String get demoServerPort;
 
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
   /// No description provided for @licenses.
   ///
   /// In en, this message translates to:

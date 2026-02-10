@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import '../models/app_settings.dart';
 import '../models/udp_state.dart';
 import 'app_settings_view_model.dart';
 
@@ -34,7 +33,7 @@ class UdpViewModel extends _$UdpViewModel {
     state = state.copyWith(
       receivePort: prefs.getString('receivePort') ?? '12345',
       sendAddress: prefs.getString('sendAddress') ?? '127.0.0.1',
-      sendPort: prefs.getString('sendPort') ?? '12345',
+      sendPort: prefs.getString('sendPort') ?? '50050',
       sendMessage: prefs.getString('sendMessage') ?? '',
       isHexMode: prefs.getBool('isHexMode') ?? false,
       sendHistory: prefs.getStringList('sendHistory') ?? [],
@@ -136,8 +135,8 @@ class UdpViewModel extends _$UdpViewModel {
               }
             });
           } catch (e) {
-            // If demo server fails to start, we might want to log it but not fail the main connection
-            print('Failed to start demo server: $e');
+            // If demo server fails to start, log via debugPrint but do not fail the main connection
+            debugPrint('Failed to start demo server: $e');
           }
         }
       }
