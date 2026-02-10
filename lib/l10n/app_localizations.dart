@@ -344,17 +344,17 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
-  /// No description provided for @fontSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Font Settings'**
-  String get fontSettings;
-
   /// No description provided for @fontSize.
   ///
   /// In en, this message translates to:
   /// **'Font Size'**
   String get fontSize;
+
+  /// No description provided for @communicationWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication Window'**
+  String get communicationWindow;
 
   /// No description provided for @language.
   ///

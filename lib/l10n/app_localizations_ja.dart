@@ -154,10 +154,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settings => '設定';
 
   @override
-  String get fontSettings => 'フォント設定';
+  String get fontSize => 'フォントサイズ';
 
   @override
-  String get fontSize => 'フォントサイズ';
+  String get communicationWindow => '通信ウィンドウ';
 
   @override
   String get language => '言語';

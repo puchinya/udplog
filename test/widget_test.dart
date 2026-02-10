@@ -50,7 +50,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
 
-    expect(find.text('Font Settings'), findsOneWidget);
+    expect(find.text('Font Size'), findsOneWidget);
 
     // Initial font size should be 12
     expect(find.text('12'), findsAtLeast(1));

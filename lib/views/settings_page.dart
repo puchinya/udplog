@@ -80,7 +80,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const Divider(),
           ListTile(
-            title: Text(l10n.fontSettings, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(l10n.fontSize, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -88,7 +88,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               children: [
                 Row(
                   children: [
-                    Text(l10n.fontSize),
+                    Text(l10n.communicationWindow),
                     Expanded(
                       child: Slider.adaptive(
                         value: settings.fontSize,
