@@ -248,6 +248,7 @@ class _UdpCommunicationPageState extends ConsumerState<UdpCommunicationPage> {
                 onPressed: udpState.isReceiving 
                     ? () => viewModel.sendData(
                         onError: (err) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err))),
+                        hexErrorLabel: l10n.hexParseError,
                       )
                     : null,
                 icon: const Icon(Icons.send),

@@ -212,7 +212,7 @@ class UdpViewModel extends _$UdpViewModel {
     );
   }
 
-  Future<void> sendData({Function(String)? onError}) async {
+  Future<void> sendData({Function(String)? onError, String? hexErrorLabel}) async {
     if (_socket == null) return;
     final address = state.sendAddress;
     final port = int.tryParse(state.sendPort);
@@ -224,12 +224,18 @@ class UdpViewModel extends _$UdpViewModel {
       if (state.isHexMode) {
         // Remove spaces and parse hex
         final hexString = message.replaceAll(' ', '');
-        if (hexString.length % 2 != 0) {
-          throw FormatException('Invalid hex length');
+        if (hexString.isEmpty || hexString.length % 2 != 0) {
+          if (onError != null) onError(hexErrorLabel ?? 'Invalid hex format');
+          return;
         }
         final bytes = <int>[];
-        for (int i = 0; i < hexString.length; i += 2) {
-          bytes.add(int.parse(hexString.substring(i, i + 2), radix: 16));
+        try {
+          for (int i = 0; i < hexString.length; i += 2) {
+            bytes.add(int.parse(hexString.substring(i, i + 2), radix: 16));
+          }
+        } catch (e) {
+          if (onError != null) onError(hexErrorLabel ?? 'Invalid hex format');
+          return;
         }
         data = Uint8List.fromList(bytes);
       } else {

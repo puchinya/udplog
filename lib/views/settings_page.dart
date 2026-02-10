@@ -117,11 +117,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const Divider(),
           ListTile(
-            title: Text(l10n.version(settings.initialized ? _version : '')),
+            leading: const Icon(Icons.description),
+            title: Text(l10n.licenses),
+            onTap: () {
+              showLicensePage(
+                context: context,
+                applicationName: 'UDP Log',
+                applicationVersion: _version,
+              );
+            },
           ),
-          const AboutListTile(
-            applicationName: 'UDP Log',
-            icon: Icon(Icons.info),
+          ListTile(
+            title: Text(l10n.version(settings.initialized ? _version : '')),
           ),
         ],
       ),
