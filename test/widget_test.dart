@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:udplog/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:udplog/l10n/app_localizations.dart';
+import 'package:udplog/views/main_navigation_page.dart';
 
 void main() {
   testWidgets('UDPLog basic UI test', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const ProviderScope(child: MyApp()));
     await tester.pumpAndSettle();
 
     // Check for English strings (default)
@@ -22,19 +24,12 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     // Build our app with Japanese locale
     await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('ja'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: MainNavigationPage(
-          themeMode: ThemeMode.system,
-          fontSize: 12.0,
-          locale: const Locale('ja'),
-          preventSleepDuringUdp: true,
-          onThemeChanged: (_) {},
-          onFontSizeChanged: (_) {},
-          onLocaleChanged: (_) {},
-          onPreventSleepDuringUdpChanged: (_) {},
+      const ProviderScope(
+        child: MaterialApp(
+          locale: Locale('ja'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MainNavigationPage(),
         ),
       ),
     );
@@ -48,7 +43,7 @@ void main() {
 
   testWidgets('Font settings update test', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const ProviderScope(child: MyApp()));
     await tester.pumpAndSettle();
 
     // Go to settings tab
