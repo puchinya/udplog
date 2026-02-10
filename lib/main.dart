@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:udplog/l10n/app_localizations.dart';
@@ -45,15 +46,21 @@ class MyApp extends ConsumerWidget {
         return supportedLocales.first;
       },
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.light),
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
+        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           brightness: Brightness.dark,
+          // 背景を真っ黒にしたい場合は、ここで background や surface を直接指定も可能です
         ),
-        useMaterial3: true,
+        // iOSウィジェットへの橋渡し
+        cupertinoOverrideTheme: const CupertinoThemeData(
+          brightness: Brightness.dark,
+          barBackgroundColor: Color.fromARGB(200, 20, 20, 20), // 透けるバーの背景
+        ),
       ),
       themeMode: settings.themeMode,
       home: const MainNavigationPage(),
