@@ -17,6 +17,7 @@ class LogViewerPage extends ConsumerWidget {
     final state = ref.watch(logViewerViewModelProvider);
     final viewModel = ref.read(logViewerViewModelProvider.notifier);
     final bool isIOS = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+    final bool isMacOS = !kIsWeb && Platform.isMacOS;
 
     Widget content = Column(
       children: [
@@ -53,6 +54,18 @@ class LogViewerPage extends ConsumerWidget {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (isMacOS)
+                        SizedBox(
+                          width: 44,
+                          height: 44,
+                          child: IconButton(
+                            tooltip: l10n.showInFinder,
+                            icon: const Icon(CupertinoIcons.folder),
+                            onPressed: () {
+                              Process.run('open', ['-R', file.path]);
+                            },
+                          ),
+                        ),
                       SizedBox(
                         width: 44,
                         height: 44,
@@ -207,6 +220,7 @@ class LogDetailView extends ConsumerWidget {
     final settings = ref.watch(appSettingsViewModelProvider);
     final fileName = file.path.split(Platform.pathSeparator).last;
     final bool isIOS = !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+    final bool isMacOS = !kIsWeb && Platform.isMacOS;
 
     final logStyle = TextStyle(
       fontFamily: 'monospace',
@@ -241,22 +255,35 @@ class LogDetailView extends ConsumerWidget {
       return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           middle: Text(fileName),
-          trailing: Builder(
-          builder: (context) => CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () {
-              final box = context.findRenderObject() as RenderBox?;
-              final rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
-              // ignore: deprecated_member_use
-              Share.shareXFiles(
-                [XFile(file.path)],
-                text: fileName,
-                sharePositionOrigin: rect,
-              );
-            },
-            child: const Icon(CupertinoIcons.share),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isMacOS)
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    Process.run('open', ['-R', file.path]);
+                  },
+                  child: const Icon(CupertinoIcons.folder),
+                ),
+              Builder(
+                builder: (context) => CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    final box = context.findRenderObject() as RenderBox?;
+                    final rect = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+                    // ignore: deprecated_member_use
+                    Share.shareXFiles(
+                      [XFile(file.path)],
+                      text: fileName,
+                      sharePositionOrigin: rect,
+                    );
+                  },
+                  child: const Icon(CupertinoIcons.share),
+                ),
+              ),
+            ],
           ),
-        ),
         ),
         child: SafeArea(child: content),
       );
@@ -266,6 +293,14 @@ class LogDetailView extends ConsumerWidget {
       appBar: AppBar(
         title: Text(fileName),
         actions: [
+          if (isMacOS)
+            IconButton(
+              tooltip: AppLocalizations.of(context)!.showInFinder,
+              icon: const Icon(Icons.folder_open),
+              onPressed: () {
+                Process.run('open', ['-R', file.path]);
+              },
+            ),
           Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.share),

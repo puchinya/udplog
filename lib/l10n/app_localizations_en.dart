@@ -150,6 +150,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get showInFinder => 'Show in Finder';
+
+  @override
   String get tabSettings => 'Settings';
 
   @override

@@ -332,6 +332,12 @@ abstract class AppLocalizations {
   /// **'Share failed: {error}'**
   String shareFailed(String error);
 
+  /// No description provided for @showInFinder.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in Finder'**
+  String get showInFinder;
+
   /// No description provided for @tabSettings.
   ///
   /// In en, this message translates to:
