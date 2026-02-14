@@ -148,6 +148,9 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String get showInFinder => 'Finderで表示';
+
+  @override
   String get tabSettings => '設定';
 
   @override

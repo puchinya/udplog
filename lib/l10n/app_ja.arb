@@ -45,6 +45,7 @@
   "error": "エラー: {error}",
   "share": "共有",
   "shareFailed": "共有失敗: {error}",
+  "showInFinder": "Finderで表示",
   "tabSettings": "設定",
   "settings": "設定",
   "fontSize": "フォントサイズ",

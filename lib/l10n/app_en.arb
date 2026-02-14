@@ -108,6 +108,7 @@
   },
   "share": "Share",
   "shareFailed": "Share failed: {error}",
+  "showInFinder": "Show in Finder",
   "@shareFailed": {
     "placeholders": {
       "error": {
