@@ -226,9 +226,11 @@ class LogDetailView extends ConsumerWidget {
             borderRadius: BorderRadius.circular(4),
           ),
           child: SingleChildScrollView(
-            child: Text(
-              state.fileContent,
-              style: logStyle,
+            child: SelectionArea(
+              child: Text(
+                state.fileContent,
+                style: logStyle,
+              ),
             ),
           ),
         ),
