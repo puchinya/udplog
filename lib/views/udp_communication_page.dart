@@ -219,52 +219,54 @@ class _UdpCommunicationPageState extends ConsumerState<UdpCommunicationPage> {
                   border: Border.all(color: Theme.of(context).dividerColor),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: udpState.logs.length,
-                  itemBuilder: (context, index) {
-                    final log = udpState.logs[index];
-                    final timeStr = DateFormat('HH:mm:ss.SSS').format(log.timestamp);
-                    String text;
-                    Color? textColor;
-                    FontStyle? fontStyle;
-
-                    if (log.isSystem) {
-                      String systemMsg = log.message;
-                      if (log.systemMessageKey != null) {
-                        switch (log.systemMessageKey) {
-                          case 'connectionStarted':
-                            systemMsg = l10n.connectionStarted(int.tryParse(log.systemMessageArgs ?? '') ?? 0);
-                            break;
-                          case 'logFile':
-                            systemMsg = l10n.logFile(log.systemMessageArgs ?? '');
-                            break;
-                          case 'disconnected':
-                            systemMsg = l10n.disconnected;
-                            break;
+                child: SelectionArea(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: udpState.logs.length,
+                    itemBuilder: (context, index) {
+                      final log = udpState.logs[index];
+                      final timeStr = DateFormat('HH:mm:ss.SSS').format(log.timestamp);
+                      String text;
+                      Color? textColor;
+                      FontStyle? fontStyle;
+  
+                      if (log.isSystem) {
+                        String systemMsg = log.message;
+                        if (log.systemMessageKey != null) {
+                          switch (log.systemMessageKey) {
+                            case 'connectionStarted':
+                              systemMsg = l10n.connectionStarted(int.tryParse(log.systemMessageArgs ?? '') ?? 0);
+                              break;
+                            case 'logFile':
+                              systemMsg = l10n.logFile(log.systemMessageArgs ?? '');
+                              break;
+                            case 'disconnected':
+                              systemMsg = l10n.disconnected;
+                              break;
+                          }
                         }
+                        text = '[$timeStr] $systemMsg';
+                        textColor = Colors.grey;
+                        fontStyle = FontStyle.italic;
+                      } else if (log.isOutgoing) {
+                        text = '[$timeStr] OUT -> ${log.address}:${log.port}: ${log.message}';
+                        textColor = Colors.blue;
+                      } else {
+                        text = '[$timeStr] ${log.address}:${log.port} -> ${log.message}';
                       }
-                      text = '[$timeStr] $systemMsg';
-                      textColor = Colors.grey;
-                      fontStyle = FontStyle.italic;
-                    } else if (log.isOutgoing) {
-                      text = '[$timeStr] OUT -> ${log.address}:${log.port}: ${log.message}';
-                      textColor = Colors.blue;
-                    } else {
-                      text = '[$timeStr] ${log.address}:${log.port} -> ${log.message}';
-                    }
-                    
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                      child: Text(
-                        text,
-                        style: logStyle.copyWith(
-                          color: textColor,
-                          fontStyle: fontStyle,
+                      
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                        child: Text(
+                          text,
+                          style: logStyle.copyWith(
+                            color: textColor,
+                            fontStyle: fontStyle,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
